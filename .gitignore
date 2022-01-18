@@ -1,4 +1,4 @@
-/_build
+*/_build
 /cover
 /deps
 /doc
@@ -8,3 +8,4 @@ erl_crash.dump
 *.beam
 /config/*.secret.exs
 .elixir_ls/
+*.iml
