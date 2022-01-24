@@ -14,12 +14,24 @@ defmodule KV.RegistryTest do
 
   test "can have named buckets added which can be looked up", %{registry: registry} do
     assert KV.Registry.create(registry, "milk") == :ok
+    assert KV.Registry.create(registry, "eggs") == :ok
 
     assert {:ok, bucket} = KV.Registry.lookup(registry, "milk")
     assert is_pid(bucket)
-
     KV.Bucket.put(bucket, "milk", 1)
     assert KV.Bucket.get(bucket, "milk") == 1
+
+    assert {:ok, bucket} = KV.Registry.lookup(registry, "eggs")
+    assert is_pid(bucket)
+    KV.Bucket.put(bucket, "eggs", 3)
+    assert KV.Bucket.get(bucket, "eggs") == 3
+  end
+
+  test "removes buckets on exit", %{registry: registry} do
+    KV.Registry.create(registry, "shopping")
+    {:ok, bucket} = KV.Registry.lookup(registry, "shopping")
+    Agent.stop(bucket)
+    assert KV.Registry.lookup(registry, "shopping") == :error
   end
 
 end

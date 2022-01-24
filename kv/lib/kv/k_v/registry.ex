@@ -3,22 +3,43 @@ defmodule KV.Registry do
 
   @impl true
   def init(:ok) do
-    {:ok, %{}}
+    names = %{}
+    monitoring_refs = %{}
+    {:ok, {names, monitoring_refs}}
   end
 
   @impl true
-  def handle_call({:lookup, name}, _from, names) do
-    {:reply, Map.fetch(names, name), names}
+  def handle_call({:lookup, name}, _from, {names, _} = state) do
+    {:reply, Map.fetch(names, name), state}
   end
 
   @impl true
-  def handle_cast({:create, name}, names) do
+  def handle_cast({:create, name}, {names, refs} = original_state) do
     if Map.has_key?(names, name) do
-      {:noreply, names}
+      {:noreply, original_state}
     else
       {:ok, bucket} = KV.Bucket.start_link([])
-      {:noreply, Map.put(names, name, bucket)}
+
+      new_bucket_monitor_ref = Process.monitor(bucket)
+      new_refs = Map.put(refs, new_bucket_monitor_ref, name)
+      new_names = Map.put(names, name, bucket)
+
+      {:noreply, {new_names, new_refs}}
     end
+  end
+
+  @impl true
+  def handle_info({:DOWN, ref, :process, _pid, _reason}, {names, refs}) do
+    {name, new_refs} = Map.pop(refs, ref)
+    new_names = Map.delete(names, name)
+    {:noreply, {new_names, new_refs}}
+  end
+
+  @impl true
+  def handle_info(msg, state) do
+    require Logger
+    Logger.warn("Unexpected message in KV.Registry: #{inspect(msg)}")
+    {:noreply, state}
   end
 
   ## Client API
