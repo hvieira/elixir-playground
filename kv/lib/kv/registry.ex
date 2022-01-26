@@ -2,37 +2,31 @@ defmodule KV.Registry do
   use GenServer
 
   @impl true
-  def init(:ok) do
-    names = %{}
+  def init(table_name) do
+    names = :ets.new(table_name, [:named_table, read_concurrency: true])
     monitoring_refs = %{}
     {:ok, {names, monitoring_refs}}
   end
 
   @impl true
-  def handle_call({:lookup, name}, _from, {names, _} = state) do
-    {:reply, Map.fetch(names, name), state}
-  end
-
-  @impl true
-  def handle_cast({:create, name}, {names, refs} = original_state) do
-    if Map.has_key?(names, name) do
-      {:noreply, original_state}
-    else
-      {:ok, bucket} = DynamicSupervisor.start_child(KV.BucketSupervisor, KV.Bucket)
-
-      new_bucket_monitor_ref = Process.monitor(bucket)
-      new_refs = Map.put(refs, new_bucket_monitor_ref, name)
-      new_names = Map.put(names, name, bucket)
-
-      {:noreply, {new_names, new_refs}}
+  def handle_call({:create, name}, _from, {names, refs} = original_state) do
+    case lookup(names, name) do
+      {:ok, pid} ->
+        {:reply, pid, original_state}
+      :error ->
+        {:ok, pid} = DynamicSupervisor.start_child(KV.BucketSupervisor, KV.Bucket)
+        ref = Process.monitor(pid)
+        new_refs = Map.put(refs, ref, name)
+        :ets.insert(names, {name, pid})
+        {:reply, pid, {names, new_refs}}
     end
   end
 
   @impl true
   def handle_info({:DOWN, ref, :process, _pid, _reason}, {names, refs}) do
-    {name, new_refs} = Map.pop(refs, ref)
-    new_names = Map.delete(names, name)
-    {:noreply, {new_names, new_refs}}
+    {name, refs} = Map.pop(refs, ref)
+    :ets.delete(names, name)
+    {:noreply, {names, refs}}
   end
 
   @impl true
@@ -44,10 +38,14 @@ defmodule KV.Registry do
 
   ## Client API
   @doc """
-  Starts the registry.
+  Starts the registry with the given options.
+
+  `:name` is always required.
   """
+  @spec start_link(list()) :: GenServer.on_start
   def start_link(opts) do
-    GenServer.start_link(__MODULE__, :ok, opts)
+    table_name = Keyword.fetch!(opts, :name)
+    GenServer.start_link(__MODULE__, table_name, opts)
   end
 
   @doc """
@@ -55,15 +53,20 @@ defmodule KV.Registry do
 
   Returns `{:ok, pid}` if the bucket exists, `:error` otherwise.
   """
+  @spec lookup(pid(), String.t()) :: {:ok, pid()} | :error
   def lookup(server, name) do
-    GenServer.call(server, {:lookup, name})
+    case :ets.lookup(server, name) do
+      [{^name, pid}] -> {:ok, pid}
+      [] -> :error
+    end
   end
 
   @doc """
   Ensures there is a bucket associated with the given `name` in `server`.
   """
+  @spec lookup(pid(), String.t()) :: term
   def create(server, name) do
-    GenServer.cast(server, {:create, name})
+    GenServer.call(server, {:create, name})
   end
 
 end
