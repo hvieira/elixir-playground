@@ -1,4 +1,4 @@
-defmodule Calculator.Core.MinusAgent do
+defmodule Calculator.Core.SubtractAgent do
   use GenServer
 
   def start_link(state) do

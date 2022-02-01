@@ -1,4 +1,4 @@
-defmodule Calculator.Core.SumAgent do
+defmodule Calculator.Core.AddAgent do
   use GenServer
 
   def start_link(state) do
