@@ -9,7 +9,7 @@ defmodule Calculator.Core.SubtractAgent do
     {:ok, init_arg}
   end
 
-  def handle_call({:minus, n1, n2}, _from, state) when is_number(n1) and is_number(n2) do
+  def handle_call({:subtract, n1, n2}, _from, state) when is_number(n1) and is_number(n2) do
     {:reply, n1 - n2, state}
   end
 end

@@ -1,4 +1,4 @@
-defmodule Calculator.Core.AddAgent do
+defmodule Calculator.Core.MultiplyAgent do
   use GenServer
 
   def start_link(state) do
@@ -11,7 +11,8 @@ defmodule Calculator.Core.AddAgent do
   end
 
   @impl true
-  def handle_call({:add, n1, n2}, _from, state) when is_number(n1) and is_number(n2) do
-    {:reply, n1 + n2, state}
+  def handle_call({:multiply, n1, n2}, _from, state) when is_number(n1) and is_number(n2) do
+    {:reply, n1 * n2, state}
   end
+
 end
