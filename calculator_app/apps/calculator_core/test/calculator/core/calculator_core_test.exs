@@ -63,11 +63,9 @@ defmodule CalculatorCoreTest do
     assert Calculator.Core.divide(10.5, 2) == 5.25
   end
 
-  # TODO change to allow this kind of arithmetic error to be returned
-  @tag :skip
   test "divide by zero returns error" do
-    assert Calculator.Core.divide(0, 0) == 0
-    assert Calculator.Core.divide(1, 0) == 0
+    assert Calculator.Core.divide(0, 0) == :divide_by_zero_error
+    assert Calculator.Core.divide(1, 0) == :divide_by_zero_error
   end
 
   test "Keeps agents running - bad messages" do
