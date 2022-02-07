@@ -68,6 +68,34 @@ defmodule CalculatorCoreTest do
     assert Calculator.Core.divide(1, 0) == :divide_by_zero_error
   end
 
+  test "interprets and computes add calculations" do
+    assert Calculator.Core.calculate("1+1") == {:ok, "2.0"}
+    assert Calculator.Core.calculate("7.57+3") == {:ok, "10.57"}
+  end
+
+  test "interprets and computes subtract calculations" do
+    assert Calculator.Core.calculate("1-1") == {:ok, "0.0"}
+    assert Calculator.Core.calculate("7.57-3") == {:ok, "4.57"}
+  end
+
+  test "interprets and computes multiply calculations" do
+    assert Calculator.Core.calculate("1*1") == {:ok, "1.0"}
+    assert Calculator.Core.calculate("1*2") == {:ok, "2.0"}
+    assert Calculator.Core.calculate("2*3") == {:ok, "6.0"}
+    assert Calculator.Core.calculate("7.57*3") == {:ok, "22.71"}
+    assert Calculator.Core.calculate("7.57*3.3") == {:ok, "24.981"}
+    assert Calculator.Core.calculate("7.57*3.39") == {:ok, "25.6623"}
+  end
+
+  test "interprets and computes divide calculations" do
+    assert Calculator.Core.calculate("1/1") == {:ok, "1.0"}
+    assert Calculator.Core.calculate("1/2") == {:ok, "0.5"}
+    assert Calculator.Core.calculate("2/3") == {:ok, "0.6666666666666666"}
+    assert Calculator.Core.calculate("7.57/3") == {:ok, "2.5233333333333334"}
+    assert Calculator.Core.calculate("7.57/3.3") == {:ok, "2.293939393939394"}
+    assert Calculator.Core.calculate("7.57/3.39") == {:ok, "2.2330383480825957"}
+  end
+
   test "Keeps agents running - bad messages" do
     send(Calculator.Core.AddAgent, :hack)
     assert Calculator.Core.add(1, 3) == 4
