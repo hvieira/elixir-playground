@@ -2,6 +2,7 @@ defmodule CalculatorInterpreterTest do
   use ExUnit.Case, async: true
 
   alias Calculator.Core.Interpreter
+  alias Calculator.Core.Expression
 
   @default_decimal_factor 1000
 
@@ -111,5 +112,77 @@ defmodule CalculatorInterpreterTest do
   test "enforces usage of leading left zero before decimals" do
     assert {:invalid_input, "Could not interpret number .005"} ==
              Interpreter.interpret(".005+.33", @default_decimal_factor)
+  end
+
+  test "can interpret simple calculation - add expressions" do
+    assert Interpreter.interpret_expression("3+7") ==
+             {:ok,
+              %Expression{
+                left: 3,
+                operator: :add,
+                right: 7
+              }}
+
+    assert Interpreter.interpret_expression("3.3+7.7") ==
+             {:ok,
+              %Expression{
+                left: 3.3,
+                operator: :add,
+                right: 7.7
+              }}
+  end
+
+  test "can interpret simple calculation - subtract expressions" do
+    assert Interpreter.interpret_expression("3-7") ==
+             {:ok,
+              %Expression{
+                left: 3,
+                operator: :subtract,
+                right: 7
+              }}
+
+    assert Interpreter.interpret_expression("3.3-7.7") ==
+             {:ok,
+              %Expression{
+                left: 3.3,
+                operator: :subtract,
+                right: 7.7
+              }}
+  end
+
+  test "can interpret simple calculation - multiply expressions" do
+    assert Interpreter.interpret_expression("3*7") ==
+             {:ok,
+              %Expression{
+                left: 3,
+                operator: :multiply,
+                right: 7
+              }}
+
+    assert Interpreter.interpret_expression("3.3*7.7") ==
+             {:ok,
+              %Expression{
+                left: 3.3,
+                operator: :multiply,
+                right: 7.7
+              }}
+  end
+
+  test "can interpret simple calculation - divide expressions" do
+    assert Interpreter.interpret_expression("3/7") ==
+             {:ok,
+              %Expression{
+                left: 3,
+                operator: :divide,
+                right: 7
+              }}
+
+    assert Interpreter.interpret_expression("3.3/7.7") ==
+             {:ok,
+              %Expression{
+                left: 3.3,
+                operator: :divide,
+                right: 7.7
+              }}
   end
 end

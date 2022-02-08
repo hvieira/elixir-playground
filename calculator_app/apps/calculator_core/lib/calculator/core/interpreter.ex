@@ -1,9 +1,6 @@
 defmodule Calculator.Core.Interpreter do
-  @type operator() :: :add | :subtract | :multiply | :divide
-  @type interpreted_computation() :: %{n1: integer(), operator: operator(), n2: integer()}
+  alias Calculator.Core.Expression
 
-  # TODO module doc test
-  @spec interpret(String.t()) :: {:ok, interpreted_computation()} | {:invalid_input, String.t()}
   def interpret("") do
     {:invalid_input, "Empty string given"}
   end
@@ -79,5 +76,66 @@ defmodule Calculator.Core.Interpreter do
     else
       _ -> raise ArgumentError, message: "Could not interpret number #{number_str}"
     end
+  end
+
+  @spec interpret_expression(String.t()) :: {:ok, Expression.t()} | {:invalid_input, String.t()}
+  def interpret_expression(str) do
+    str
+    |> clean_input
+    |> String.to_charlist()
+    |> interpret_expression(%Expression{left: nil, operator: nil, right: nil}, [])
+  end
+
+  defp interpret_expression(
+         [char | t],
+         captured_expr,
+         number_char_bag
+       )
+       when (char >= ?0 and char < ?9) or char == ?. do
+    interpret_expression(t, captured_expr, number_char_bag ++ [char])
+  end
+
+  # capture a number for left
+  defp interpret_expression(
+         [char | _t] = str,
+         %Expression{left: nil, operator: nil, right: nil} = expr,
+         [_ | _] = number_char_bag
+       )
+       when char == ?+ or char == ?- or char == ?* or char == ?/ do
+    {float, _} = Float.parse(List.to_string(number_char_bag))
+
+    interpret_expression(str, %{expr | left: float}, [])
+  end
+
+  # capture the operators
+  defp interpret_expression([?+ | t], expr, []) do
+    interpret_expression(t, %{expr | operator: :add}, [])
+  end
+
+  defp interpret_expression([?- | t], expr, []) do
+    interpret_expression(t, %{expr | operator: :subtract}, [])
+  end
+
+  defp interpret_expression([?* | t], expr, []) do
+    interpret_expression(t, %{expr | operator: :multiply}, [])
+  end
+
+  defp interpret_expression([?/ | t], expr, []) do
+    interpret_expression(t, %{expr | operator: :divide}, [])
+  end
+
+  # capture a number for right
+  defp interpret_expression(
+         [],
+         %Expression{left: _left, operator: _op, right: nil} = expr,
+         [_ | _] = number_char_bag
+       ) do
+    {float, _} = Float.parse(List.to_string(number_char_bag))
+
+    interpret_expression([], %{expr | right: float}, [])
+  end
+
+  defp interpret_expression([], captured_expr, []) do
+    {:ok, captured_expr}
   end
 end
