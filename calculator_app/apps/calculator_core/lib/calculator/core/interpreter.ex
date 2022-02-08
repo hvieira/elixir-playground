@@ -107,35 +107,81 @@ defmodule Calculator.Core.Interpreter do
     interpret_expression(str, %{expr | left: float}, [])
   end
 
+  # when a expression starts with a sign
+  defp interpret_expression(
+         [?+ | t],
+         %Expression{left: nil, operator: nil, right: nil} = expr,
+         []
+       ) do
+    interpret_expression(t, %{expr | left: 0, operator: :add}, [])
+  end
+
+  defp interpret_expression(
+         [?- | t],
+         %Expression{left: nil, operator: nil, right: nil} = expr,
+         []
+       ) do
+    interpret_expression(t, %{expr | left: 0, operator: :subtract}, [])
+  end
+
+  defp interpret_expression(
+         [?* | _],
+         %Expression{left: nil, operator: nil, right: nil},
+         []
+       ) do
+    raise ArgumentError, "Malformed expression"
+  end
+
+  defp interpret_expression(
+         [?/ | _],
+         %Expression{left: nil, operator: nil, right: nil},
+         []
+       ) do
+    raise ArgumentError, "Malformed expression"
+  end
+
   # capture the operators
-  defp interpret_expression([?+ | t], expr, []) do
-    interpret_expression(t, %{expr | operator: :add}, [])
+
+  ## subsequent signs
+  defp interpret_expression(
+         [char | _] = str,
+         %Expression{left: left, operator: operator, right: nil} = expr,
+         []
+       )
+       when (char == ?+ or char == ?- or char == ?* or char == ?/) and operator != nil and
+              left != nil do
+    %{
+      expr
+      | right:
+          interpret_expression(
+            str,
+            %Expression{left: nil, operator: nil, right: nil, within_parens: true},
+            []
+          )
+    }
   end
 
-  defp interpret_expression([?- | t], expr, []) do
-    interpret_expression(t, %{expr | operator: :subtract}, [])
-  end
+  # capture operators
+  defp interpret_expression([?+ | t], expr, []),
+    do: interpret_expression(t, %{expr | operator: :add}, [])
 
-  defp interpret_expression([?* | t], expr, []) do
-    interpret_expression(t, %{expr | operator: :multiply}, [])
-  end
+  defp interpret_expression([?- | t], expr, []),
+    do: interpret_expression(t, %{expr | operator: :subtract}, [])
 
-  defp interpret_expression([?/ | t], expr, []) do
-    interpret_expression(t, %{expr | operator: :divide}, [])
-  end
+  defp interpret_expression([?* | t], expr, []),
+    do: interpret_expression(t, %{expr | operator: :multiply}, [])
+
+  defp interpret_expression([?/ | t], expr, []),
+    do: interpret_expression(t, %{expr | operator: :divide}, [])
 
   # capture a number for right
-  defp interpret_expression(
-         [],
-         %Expression{left: _left, operator: _op, right: nil} = expr,
-         [_ | _] = number_char_bag
-       ) do
+  defp interpret_expression([], %Expression{right: nil} = expr, [_ | _] = number_char_bag) do
     {float, _} = Float.parse(List.to_string(number_char_bag))
 
     interpret_expression([], %{expr | right: float}, [])
   end
 
   defp interpret_expression([], captured_expr, []) do
-    {:ok, captured_expr}
+    captured_expr
   end
 end

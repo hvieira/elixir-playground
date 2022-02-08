@@ -116,73 +116,157 @@ defmodule CalculatorInterpreterTest do
 
   test "can interpret simple calculation - add expressions" do
     assert Interpreter.interpret_expression("3+7") ==
-             {:ok,
-              %Expression{
-                left: 3,
-                operator: :add,
-                right: 7
-              }}
+             %Expression{
+               left: 3,
+               operator: :add,
+               right: 7
+             }
 
     assert Interpreter.interpret_expression("3.3+7.7") ==
-             {:ok,
-              %Expression{
-                left: 3.3,
-                operator: :add,
-                right: 7.7
-              }}
+             %Expression{
+               left: 3.3,
+               operator: :add,
+               right: 7.7
+             }
   end
 
   test "can interpret simple calculation - subtract expressions" do
     assert Interpreter.interpret_expression("3-7") ==
-             {:ok,
-              %Expression{
-                left: 3,
-                operator: :subtract,
-                right: 7
-              }}
+             %Expression{
+               left: 3,
+               operator: :subtract,
+               right: 7
+             }
 
     assert Interpreter.interpret_expression("3.3-7.7") ==
-             {:ok,
-              %Expression{
-                left: 3.3,
-                operator: :subtract,
-                right: 7.7
-              }}
+             %Expression{
+               left: 3.3,
+               operator: :subtract,
+               right: 7.7
+             }
   end
 
   test "can interpret simple calculation - multiply expressions" do
     assert Interpreter.interpret_expression("3*7") ==
-             {:ok,
-              %Expression{
-                left: 3,
-                operator: :multiply,
-                right: 7
-              }}
+             %Expression{
+               left: 3,
+               operator: :multiply,
+               right: 7
+             }
 
     assert Interpreter.interpret_expression("3.3*7.7") ==
-             {:ok,
-              %Expression{
-                left: 3.3,
-                operator: :multiply,
-                right: 7.7
-              }}
+             %Expression{
+               left: 3.3,
+               operator: :multiply,
+               right: 7.7
+             }
   end
 
   test "can interpret simple calculation - divide expressions" do
     assert Interpreter.interpret_expression("3/7") ==
-             {:ok,
-              %Expression{
-                left: 3,
-                operator: :divide,
-                right: 7
-              }}
+             %Expression{
+               left: 3,
+               operator: :divide,
+               right: 7
+             }
 
     assert Interpreter.interpret_expression("3.3/7.7") ==
-             {:ok,
-              %Expression{
-                left: 3.3,
-                operator: :divide,
-                right: 7.7
-              }}
+             %Expression{
+               left: 3.3,
+               operator: :divide,
+               right: 7.7
+             }
+  end
+
+  test "can interpret subsequent signs" do
+    assert Interpreter.interpret_expression("3.3++3.7") ==
+             %Expression{
+               left: 3.3,
+               operator: :add,
+               right: %Expression{left: 0, operator: :add, right: 3.7, within_parens: true}
+             }
+
+    assert Interpreter.interpret_expression("3.3+-3.7") ==
+             %Expression{
+               left: 3.3,
+               operator: :add,
+               right: %Expression{left: 0, operator: :subtract, right: 3.7, within_parens: true}
+             }
+
+    assert Interpreter.interpret_expression("3.3--3.7") ==
+             %Expression{
+               left: 3.3,
+               operator: :subtract,
+               right: %Expression{left: 0, operator: :subtract, right: 3.7, within_parens: true}
+             }
+
+    assert Interpreter.interpret_expression("3.3-+3.7") ==
+             %Expression{
+               left: 3.3,
+               operator: :subtract,
+               right: %Expression{left: 0, operator: :add, right: 3.7, within_parens: true}
+             }
+
+    assert Interpreter.interpret_expression("3*+7") ==
+             %Expression{
+               left: 3,
+               operator: :multiply,
+               right: %Expression{left: 0, operator: :add, right: 7, within_parens: true}
+             }
+
+    assert Interpreter.interpret_expression("3*-7") ==
+             %Expression{
+               left: 3,
+               operator: :multiply,
+               right: %Expression{left: 0, operator: :subtract, right: 7, within_parens: true}
+             }
+
+    assert Interpreter.interpret_expression("3/+7") ==
+             %Expression{
+               left: 3,
+               operator: :divide,
+               right: %Expression{left: 0, operator: :add, right: 7, within_parens: true}
+             }
+
+    assert Interpreter.interpret_expression("3/-7") ==
+             %Expression{
+               left: 3,
+               operator: :divide,
+               right: %Expression{left: 0, operator: :subtract, right: 7, within_parens: true}
+             }
+  end
+
+  test "can interpret subsequent signs - a bunch of them" do
+    assert Interpreter.interpret_expression("3.3+--+3.7") ==
+             %Expression{
+               left: 3.3,
+               operator: :add,
+               right: %Expression{
+                 within_parens: true,
+                 left: 0,
+                 operator: :subtract,
+                 right: %Expression{
+                   within_parens: true,
+                   left: 0,
+                   operator: :subtract,
+                   right: %Expression{
+                     within_parens: true,
+                     left: 0,
+                     operator: :add,
+                     right: 3.7
+                   }
+                 }
+               }
+             }
+  end
+
+  test "raises when subsequent signs are invalid" do
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Interpreter.interpret_expression("1//1")
+    end
+
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Interpreter.interpret_expression("1**1")
+    end
   end
 end
