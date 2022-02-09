@@ -82,106 +82,86 @@ defmodule Calculator.Core.Interpreter do
   def interpret_expression(str) do
     str
     |> clean_input
-    |> String.to_charlist()
-    |> interpret_expression(%Expression{left: nil, operator: nil, right: nil}, [])
+    |> interpret_expression(%Expression{left: nil, operator: nil, right: nil})
   end
 
+  # capture number for left
+  defp interpret_expression(<<char, _::binary>> = str, %Expression{left: nil} = expr)
+       when char in ?0..?9 do
+    {float, remainder_str} = Float.parse(str)
+
+    interpret_expression(remainder_str, %{expr | left: float})
+  end
+
+  # capture number for right
   defp interpret_expression(
-         [char | t],
-         captured_expr,
-         number_char_bag
+         <<char, _::binary>> = str,
+         %Expression{left: left, operator: operator, right: nil} = expr
        )
-       when (char >= ?0 and char < ?9) or char == ?. do
-    interpret_expression(t, captured_expr, number_char_bag ++ [char])
+       when char in ?0..?9 and left != nil and operator != nil do
+    {float, remainder_str} = Float.parse(str)
+
+    interpret_expression(remainder_str, %{expr | right: float})
   end
 
-  # capture a number for left
+  # when we're looking at a operator and the expression does not have a left term yet
   defp interpret_expression(
-         [char | _t] = str,
-         %Expression{left: nil, operator: nil, right: nil} = expr,
-         [_ | _] = number_char_bag
-       )
-       when char == ?+ or char == ?- or char == ?* or char == ?/ do
-    {float, _} = Float.parse(List.to_string(number_char_bag))
-
-    interpret_expression(str, %{expr | left: float}, [])
-  end
-
-  # when a expression starts with a sign
-  defp interpret_expression(
-         [?+ | t],
-         %Expression{left: nil, operator: nil, right: nil} = expr,
-         []
+         <<?+, rest::binary>>,
+         %Expression{left: nil, operator: nil, right: nil} = expr
        ) do
-    interpret_expression(t, %{expr | left: 0, operator: :add}, [])
+    interpret_expression(rest, %{expr | left: 0, operator: :add})
   end
 
   defp interpret_expression(
-         [?- | t],
-         %Expression{left: nil, operator: nil, right: nil} = expr,
-         []
+         <<?-, rest::binary>>,
+         %Expression{left: nil, operator: nil, right: nil} = expr
        ) do
-    interpret_expression(t, %{expr | left: 0, operator: :subtract}, [])
+    interpret_expression(rest, %{expr | left: 0, operator: :subtract})
   end
 
   defp interpret_expression(
-         [?* | _],
-         %Expression{left: nil, operator: nil, right: nil},
-         []
+         <<?*, _rest::binary>>,
+         %Expression{left: nil, operator: nil, right: nil}
        ) do
     raise ArgumentError, "Malformed expression"
   end
 
   defp interpret_expression(
-         [?/ | _],
-         %Expression{left: nil, operator: nil, right: nil},
-         []
+         <<?/, _rest::binary>>,
+         %Expression{left: nil, operator: nil, right: nil}
        ) do
     raise ArgumentError, "Malformed expression"
   end
 
-  # capture the operators
-
-  ## subsequent signs
+  # when we're looking at a operator and the expression already has a left term and operator
   defp interpret_expression(
-         [char | _] = str,
-         %Expression{left: left, operator: operator, right: nil} = expr,
-         []
+         <<char, _::binary>> = str,
+         %Expression{left: left, operator: operator, right: nil} = expr
        )
-       when (char == ?+ or char == ?- or char == ?* or char == ?/) and operator != nil and
-              left != nil do
+       when (char == ?+ or char == ?- or char == ?* or char == ?/) and
+              operator != nil and left != nil do
     %{
       expr
       | right:
           interpret_expression(
             str,
-            %Expression{left: nil, operator: nil, right: nil, within_parens: true},
-            []
+            %Expression{left: nil, operator: nil, right: nil, within_parens: true}
           )
     }
   end
 
   # capture operators
-  defp interpret_expression([?+ | t], expr, []),
-    do: interpret_expression(t, %{expr | operator: :add}, [])
+  defp interpret_expression(<<?+, rest::binary>>, expr),
+    do: interpret_expression(rest, %{expr | operator: :add})
 
-  defp interpret_expression([?- | t], expr, []),
-    do: interpret_expression(t, %{expr | operator: :subtract}, [])
+  defp interpret_expression(<<?-, rest::binary>>, expr),
+    do: interpret_expression(rest, %{expr | operator: :subtract})
 
-  defp interpret_expression([?* | t], expr, []),
-    do: interpret_expression(t, %{expr | operator: :multiply}, [])
+  defp interpret_expression(<<?*, rest::binary>>, expr),
+    do: interpret_expression(rest, %{expr | operator: :multiply})
 
-  defp interpret_expression([?/ | t], expr, []),
-    do: interpret_expression(t, %{expr | operator: :divide}, [])
+  defp interpret_expression(<<?/, rest::binary>>, expr),
+    do: interpret_expression(rest, %{expr | operator: :divide})
 
-  # capture a number for right
-  defp interpret_expression([], %Expression{right: nil} = expr, [_ | _] = number_char_bag) do
-    {float, _} = Float.parse(List.to_string(number_char_bag))
-
-    interpret_expression([], %{expr | right: float}, [])
-  end
-
-  defp interpret_expression([], captured_expr, []) do
-    captured_expr
-  end
+  defp interpret_expression("", captured_expr), do: captured_expr
 end
