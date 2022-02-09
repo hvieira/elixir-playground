@@ -104,7 +104,7 @@ defmodule Calculator.Core.Interpreter do
     interpret_expression(remainder_str, %{expr | right: float})
   end
 
-  # when we're looking at a operator and the expression does not have a left term yet
+  # when we're looking at a operator and the expression does not have a left term yet - treat it as a sign (for signed numbers)
   defp interpret_expression(
          <<?+, rest::binary>>,
          %Expression{left: nil, operator: nil, right: nil} = expr
@@ -133,7 +133,7 @@ defmodule Calculator.Core.Interpreter do
     raise ArgumentError, "Malformed expression"
   end
 
-  # when we're looking at a operator and the expression already has a left term and operator
+  # when we're looking at a operator and the expression already has a left term and operator but no right term
   defp interpret_expression(
          <<char, _::binary>> = str,
          %Expression{left: left, operator: operator, right: nil} = expr
@@ -150,6 +150,29 @@ defmodule Calculator.Core.Interpreter do
     }
   end
 
+  # when we're looking at a operator and the expression is already complete
+  defp interpret_expression(
+         <<char, rest::binary>>,
+         %Expression{left: left, operator: operator, right: right, within_parens: wp} = expr
+       )
+       when (char == ?+ or char == ?- or char == ?* or char == ?/) and
+              operator != nil and left != nil and right != nil do
+    op =
+      case char do
+        ?+ -> :add
+        ?- -> :subtract
+        ?* -> :multiply
+        ?/ -> :divide
+      end
+
+    %Expression{
+      left: %{expr | within_parens: false},
+      operator: op,
+      right: interpret_expression(rest, %Expression{left: nil, operator: nil, right: nil}),
+      within_parens: wp
+    }
+  end
+
   # capture operators
   defp interpret_expression(<<?+, rest::binary>>, expr),
     do: interpret_expression(rest, %{expr | operator: :add})
@@ -163,5 +186,59 @@ defmodule Calculator.Core.Interpreter do
   defp interpret_expression(<<?/, rest::binary>>, expr),
     do: interpret_expression(rest, %{expr | operator: :divide})
 
+  # handle starting parentheses
+  defp interpret_expression(<<?(, rest::binary>>, %Expression{left: nil} = expr) do
+    {enclosed_expression, remainder} = capture_enclosed_expression(rest)
+
+    interpret_expression(remainder, %{
+      expr
+      | left:
+          interpret_expression(enclosed_expression, %Expression{
+            left: nil,
+            operator: nil,
+            right: nil,
+            within_parens: true
+          })
+    })
+  end
+
+  defp interpret_expression(<<?(, rest::binary>>, %Expression{right: nil} = expr) do
+    {enclosed_expression, remainder} = capture_enclosed_expression(rest)
+
+    interpret_expression(remainder, %{
+      expr
+      | right:
+          interpret_expression(enclosed_expression, %Expression{
+            left: nil,
+            operator: nil,
+            right: nil,
+            within_parens: true
+          })
+    })
+  end
+
+  # handle starting closing parentheses
+  defp interpret_expression(<<?), _>>, _expr), do: raise(ArgumentError, "Malformed expression")
+
+  # ending states
+  defp interpret_expression("", %Expression{left: left, operator: nil, right: nil}), do: left
   defp interpret_expression("", captured_expr), do: captured_expr
+
+  # utilities
+  defp capture_enclosed_expression(str, captured \\ [], level \\ 0)
+
+  defp capture_enclosed_expression(<<?), rest::binary>>, captured, 0),
+    do: {List.to_string(captured), rest}
+
+  defp capture_enclosed_expression(<<?), rest::binary>>, captured, level),
+    do: capture_enclosed_expression(rest, captured ++ [?)], level - 1)
+
+  defp capture_enclosed_expression(<<?(, rest::binary>>, captured, level),
+    do: capture_enclosed_expression(rest, captured ++ [?(], level + 1)
+
+  defp capture_enclosed_expression(<<char, rest::binary>>, captured, level),
+    do: capture_enclosed_expression(rest, captured ++ [char], level)
+
+  defp capture_enclosed_expression("", _captured, _level),
+    do: raise(ArgumentError, "Malformed expression. Parentheses are unbalanced")
 end
