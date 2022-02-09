@@ -267,6 +267,14 @@ defmodule CalculatorInterpreterTest do
     end
 
     assert_raise ArgumentError, "Malformed expression", fn ->
+      Interpreter.interpret_expression("1+//1")
+    end
+
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Interpreter.interpret_expression("1-//1")
+    end
+
+    assert_raise ArgumentError, "Malformed expression", fn ->
       Interpreter.interpret_expression("1**1")
     end
   end
