@@ -139,7 +139,7 @@ defmodule Calculator.Core.Interpreter do
          %Expression{left: left, operator: operator, right: nil} = expr
        )
        when (char == ?+ or char == ?- or char == ?* or char == ?/) and
-              operator != nil and left != nil do
+              left != nil and operator != nil do
     %{
       expr
       | right:
@@ -156,7 +156,7 @@ defmodule Calculator.Core.Interpreter do
          %Expression{left: left, operator: operator, right: right, within_parens: wp} = expr
        )
        when (char == ?+ or char == ?- or char == ?* or char == ?/) and
-              operator != nil and left != nil and right != nil do
+              left != nil and operator != nil and right != nil do
     op =
       case char do
         ?+ -> :add
