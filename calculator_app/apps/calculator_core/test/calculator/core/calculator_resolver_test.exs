@@ -49,17 +49,65 @@ defmodule CalculatorCoreResolverTest do
              operator: :add,
              right: %Expression{left: 3.81, operator: :add, right: 3.81}
            }) == 3.81 * 4
+  end
 
-    #    assert Resolver.resolve_expression(%Expression{
-    #             left: %Expression{left: 3.81, operator: :multiply, right: 5},
-    #             operator: :multiply,
-    #             right: 2
-    #           }) == 38.1
-    #
-    #    assert Resolver.resolve_expression(%Expression{
-    #             left: %Expression{left: 1, operator: :divide, right: 1},
-    #             operator: :divide,
-    #             right: %Expression{left: 2, operator: :divide, right: 1}
-    #           }) == 0.5
+  test "Can resolve expressions that have multiple consecutive operations - subtract" do
+    assert Resolver.resolve_expression(%Expression{
+             left: %Expression{left: 7, operator: :subtract, right: 6},
+             operator: :subtract,
+             right: 1
+           }) == 0
+
+    assert Resolver.resolve_expression(%Expression{
+             left: 1,
+             operator: :subtract,
+             right: %Expression{left: 2, operator: :subtract, right: 3}
+           }) == 2
+
+    assert Resolver.resolve_expression(%Expression{
+             left: %Expression{left: 3.81, operator: :subtract, right: 3.81},
+             operator: :subtract,
+             right: %Expression{left: 3.81, operator: :subtract, right: 3.81}
+           }) == 0
+  end
+
+  test "Can resolve expressions that have multiple consecutive operations - multiply" do
+    assert Resolver.resolve_expression(%Expression{
+             left: %Expression{left: 7, operator: :multiply, right: 6},
+             operator: :multiply,
+             right: 1
+           }) == 42
+
+    assert Resolver.resolve_expression(%Expression{
+             left: 1,
+             operator: :multiply,
+             right: %Expression{left: 2, operator: :multiply, right: 3}
+           }) == 6
+
+    assert Resolver.resolve_expression(%Expression{
+             left: %Expression{left: 3.81, operator: :multiply, right: 3.81},
+             operator: :multiply,
+             right: %Expression{left: 3.81, operator: :multiply, right: 3.81}
+           }) == Float.pow(3.81, 4)
+  end
+
+  test "Can resolve expressions that have multiple consecutive operations - divide" do
+    assert Resolver.resolve_expression(%Expression{
+             left: %Expression{left: 7, operator: :divide, right: 6},
+             operator: :divide,
+             right: 1
+           }) == (7/6)/1
+
+    assert Resolver.resolve_expression(%Expression{
+             left: 1,
+             operator: :divide,
+             right: %Expression{left: 2, operator: :divide, right: 3}
+           }) == 1/(2/3)
+
+    assert Resolver.resolve_expression(%Expression{
+             left: %Expression{left: 3.81, operator: :divide, right: 3.81},
+             operator: :divide,
+             right: %Expression{left: 3.81, operator: :divide, right: 3.81}
+           }) == 1
   end
 end
