@@ -340,11 +340,59 @@ defmodule CalculatorExpressionTest do
            }
   end
 
-  #  test "interpret expressions ending without a final term/number as bad input" do
-  #    assert Interpreter.interpret("3+") == {:invalid_input, "Malformed expression"}
-  #    assert Interpreter.interpret("3-") == {:invalid_input, "Malformed expression"}
-  #    assert Interpreter.interpret("3*") == {:invalid_input, "Malformed expression"}
-  #    assert Interpreter.interpret("3/") == {:invalid_input, "Malformed expression"}
-  #  end
-  #
+  test "can add in-parentheses expressions - adds to right" do
+    assert Expression.add_parentheses_encapsulated_expression(
+             %Expression{left: 3, operator: :add, right: nil},
+             %Expression{left: 0, operator: :subtract, right: 3}
+           ) == %Expression{
+             left: 3,
+             operator: :add,
+             right: %Expression{left: 0, operator: :subtract, right: 3}
+           }
+  end
+
+  test "validate expressions - having no right term is an invalid expression" do
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.validate!(%Expression{
+        left: 3,
+        operator: :subtract,
+        right: nil
+      })
+    end
+
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.validate!(%Expression{
+        left: %Expression{
+          left: %Expression{
+            left: %Expression{
+              left: 0,
+              operator: :add,
+              right: %Expression{left: 1, operator: :multiply, right: 2}
+            },
+            operator: :add,
+            right: 0
+          },
+          operator: :add,
+          right: %Expression{left: 3, operator: :multiply, right: 4}
+        },
+        operator: :subtract,
+        right: nil
+      })
+    end
+  end
+
+  test "validate expressions - having no operator is an invalid expression" do
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.validate!(%Expression{
+        left: 3,
+        operator: nil,
+        right: 3
+      })
+    end
+  end
+
+  test "validate expressions" do
+    expr = %Expression{left: 3, operator: :add, right: 2}
+    assert Expression.validate!(expr) == expr
+  end
 end
