@@ -76,7 +76,8 @@ defmodule Calculator.Core.Expression do
   def add_parentheses_encapsulated_expression(
         %Expression{right: r},
         _encapsulated_expression
-      ) when r != nil,
+      )
+      when r != nil,
       do: raise(ArgumentError, "Malformed expression")
 
   def validate!(nil), do: raise(ArgumentError, "Malformed expression")

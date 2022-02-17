@@ -371,19 +371,21 @@ defmodule CalculatorExpressionTest do
     encapsulated_expr = %Expression{
       left: %Expression{left: 1, operator: :add, right: 2},
       operator: :add,
-      right: %Expression{left: 3, operator: :subtract, right: 4},
+      right: %Expression{left: 3, operator: :subtract, right: 4}
     }
-      Expression.add_parentheses_encapsulated_expression(
-        %Expression{left: 1, operator: :add, right: nil},
-        %Expression{
-          left: 1,
-          operator: :add,
-          right: encapsulated_expr
-        }
-      )
+
+    Expression.add_parentheses_encapsulated_expression(
+      %Expression{left: 1, operator: :add, right: nil},
+      %Expression{
+        left: 1,
+        operator: :add,
+        right: encapsulated_expr
+      }
+    )
   end
 
-  # TODO test priority of parentheses along with multiply and divide
+  test "can add in-parentheses expressions - priority along with multiply" do
+  end
 
   test "can add in-parentheses expressions - only if the expressions are valid" do
     assert_raise ArgumentError, "Malformed expression", fn ->
