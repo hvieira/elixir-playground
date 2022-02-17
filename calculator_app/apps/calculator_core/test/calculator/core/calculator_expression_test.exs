@@ -374,14 +374,14 @@ defmodule CalculatorExpressionTest do
       right: %Expression{left: 3, operator: :subtract, right: 4}
     }
 
-    Expression.add_parentheses_encapsulated_expression(
-      %Expression{left: 1, operator: :add, right: nil},
-      %Expression{
-        left: 1,
-        operator: :add,
-        right: encapsulated_expr
-      }
-    )
+    assert Expression.add_parentheses_encapsulated_expression(
+             %Expression{left: 1, operator: :add, right: nil},
+             encapsulated_expr
+           ) == %Expression{
+             left: 1,
+             operator: :add,
+             right: encapsulated_expr
+           }
   end
 
   test "can add in-parentheses expressions - priority along with multiply" do
