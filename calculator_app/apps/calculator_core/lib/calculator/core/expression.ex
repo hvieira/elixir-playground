@@ -65,7 +65,14 @@ defmodule Calculator.Core.Expression do
       do: %{target_expr | right: validate!(encapsulated_expression)}
 
   # TODO ArgumentError here is not ideal because it is a validation error
+  def validate!(nil), do: raise(ArgumentError, "Malformed expression")
+  def validate!(%Expression{left: nil}), do: raise(ArgumentError, "Malformed expression")
   def validate!(%Expression{right: nil}), do: raise(ArgumentError, "Malformed expression")
   def validate!(%Expression{operator: nil}), do: raise(ArgumentError, "Malformed expression")
-  def validate!(expr), do: expr
+  def validate!(n) when is_number(n), do: n
+  def validate!(%Expression{left: l, right: r} = expr) do
+    validate!(l)
+    validate!(r)
+    expr
+  end
 end

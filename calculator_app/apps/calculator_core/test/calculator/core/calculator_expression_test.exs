@@ -351,6 +351,16 @@ defmodule CalculatorExpressionTest do
            }
   end
 
+  test "validate expressions - empty or nil expressions are invalid" do
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.validate!(nil)
+    end
+
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.validate!(%Expression{})
+    end
+  end
+
   test "validate expressions - having no right term is an invalid expression" do
     assert_raise ArgumentError, "Malformed expression", fn ->
       Expression.validate!(%Expression{
@@ -378,6 +388,18 @@ defmodule CalculatorExpressionTest do
         operator: :subtract,
         right: nil
       })
+    end
+  end
+
+  test "validate expressions - having no right term in a subtree is an invalid expression" do
+    expr = @empty_expression
+    |> Expression.add_value(1)
+    |> Expression.add_operator(:add)
+    |> Expression.add_value(2)
+    |> Expression.add_operator(:multiply)
+
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.validate!(expr)
     end
   end
 
