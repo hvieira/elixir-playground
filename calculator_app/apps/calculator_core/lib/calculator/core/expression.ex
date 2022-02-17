@@ -42,8 +42,11 @@ defmodule Calculator.Core.Expression do
 
   def add_operator(%Expression{operator: nil} = expr, op), do: %{expr | operator: op}
 
-  # defines priority of multiply and divide over add and subtract
-  def add_operator(%Expression{left: l, operator: existing_op, right: r}, op)
+  # defines priority of multiply and divide over add and subtract (but not parentheses expressions)
+  def add_operator(
+        %Expression{within_parens: false, left: l, operator: existing_op, right: r},
+        op
+      )
       when existing_op in [:add, :subtract] and op in [:multiply, :divide],
       do: %Expression{
         left: l,
@@ -65,20 +68,29 @@ defmodule Calculator.Core.Expression do
         %Expression{left: nil},
         encapsulated_expression
       ),
-      do: encapsulated_expression
+      do: enforce_parentheses_encapsulation(encapsulated_expression)
 
   def add_parentheses_encapsulated_expression(
         %Expression{right: nil} = target_expr,
         encapsulated_expression
       ),
-      do: %{target_expr | right: validate!(encapsulated_expression)}
+      do: %{
+        target_expr
+        | right: enforce_parentheses_encapsulation(validate!(encapsulated_expression))
+      }
 
   # for cases where the last operator was a multiply/divide and we're waiting for a right term on the created subtree
   def add_parentheses_encapsulated_expression(
         %Expression{right: %Expression{right: nil}} = target_expr,
         encapsulated_expression
       ),
-      do: %{target_expr | right: %{target_expr.right | right: validate!(encapsulated_expression)}}
+      do: %{
+        target_expr
+        | right: %{
+            target_expr.right
+            | right: enforce_parentheses_encapsulation(validate!(encapsulated_expression))
+          }
+      }
 
   def add_parentheses_encapsulated_expression(
         %Expression{right: r},
@@ -98,4 +110,6 @@ defmodule Calculator.Core.Expression do
     validate!(r)
     expr
   end
+
+  defp enforce_parentheses_encapsulation(%Expression{} = expr), do: %{expr | within_parens: true}
 end

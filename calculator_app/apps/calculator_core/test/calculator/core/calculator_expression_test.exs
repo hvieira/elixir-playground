@@ -344,7 +344,7 @@ defmodule CalculatorExpressionTest do
     assert Expression.add_parentheses_encapsulated_expression(
              %Expression{},
              %Expression{left: 0, operator: :subtract, right: 3}
-           ) == %Expression{left: 0, operator: :subtract, right: 3}
+           ) == %Expression{within_parens: true, left: 0, operator: :subtract, right: 3}
   end
 
   test "can add in-parentheses expressions - adds to right if right is empty" do
@@ -354,7 +354,7 @@ defmodule CalculatorExpressionTest do
            ) == %Expression{
              left: 3,
              operator: :add,
-             right: %Expression{left: 0, operator: :subtract, right: 3}
+             right: %Expression{within_parens: true, left: 0, operator: :subtract, right: 3}
            }
   end
 
@@ -380,13 +380,22 @@ defmodule CalculatorExpressionTest do
            ) == %Expression{
              left: 1,
              operator: :add,
-             right: encapsulated_expr
+             right: %{encapsulated_expr | within_parens: true}
            }
   end
 
   test "can add in-parentheses expressions - takes priority over multiply" do
-    # TODO test (1-2)*3
-    # TODO test 1*(2*3)*4
+    # (1-2)*3
+    expr =
+      %Expression{within_parens: true, left: 1, operator: :subtract, right: 2}
+      |> Expression.add_operator(:multiply)
+      |> Expression.add_value(3)
+
+    assert expr == %Expression{
+             left: %Expression{within_parens: true, left: 1, operator: :subtract, right: 2},
+             operator: :multiply,
+             right: 3
+           }
 
     # 1*(2-3)
     assert Expression.add_parentheses_encapsulated_expression(
@@ -395,7 +404,30 @@ defmodule CalculatorExpressionTest do
            ) == %Expression{
              left: 1,
              operator: :multiply,
-             right: %Expression{left: 2, operator: :subtract, right: 3}
+             right: %Expression{within_parens: true, left: 2, operator: :subtract, right: 3}
+           }
+
+    # 1*(2+3)*4
+    expr =
+      @empty_expression
+      |> Expression.add_value(1)
+      |> Expression.add_operator(:multiply)
+      |> Expression.add_parentheses_encapsulated_expression(%Expression{
+        left: 2,
+        operator: :add,
+        right: 3
+      })
+      |> Expression.add_operator(:multiply)
+      |> Expression.add_value(4)
+
+    assert expr == %Expression{
+             left: %Expression{
+               left: 1,
+               operator: :multiply,
+               right: %Expression{within_parens: true, left: 2, operator: :add, right: 3}
+             },
+             operator: :multiply,
+             right: 4
            }
 
     # 1-2*(3+4)
@@ -414,7 +446,74 @@ defmodule CalculatorExpressionTest do
              right: %Expression{
                left: 2,
                operator: :multiply,
-               right: %Expression{left: 3, operator: :add, right: 4}
+               right: %Expression{within_parens: true, left: 3, operator: :add, right: 4}
+             }
+           }
+  end
+
+  test "can add in-parentheses expressions - takes priority over divide" do
+    # (1-2)/3
+    expr =
+      %Expression{within_parens: true, left: 1, operator: :subtract, right: 2}
+      |> Expression.add_operator(:divide)
+      |> Expression.add_value(3)
+
+    assert expr == %Expression{
+             left: %Expression{within_parens: true, left: 1, operator: :subtract, right: 2},
+             operator: :divide,
+             right: 3
+           }
+
+    # 1/(2-3)
+    assert Expression.add_parentheses_encapsulated_expression(
+             %Expression{left: 1, operator: :divide, right: nil},
+             %Expression{left: 2, operator: :subtract, right: 3}
+           ) == %Expression{
+             left: 1,
+             operator: :divide,
+             right: %Expression{within_parens: true, left: 2, operator: :subtract, right: 3}
+           }
+
+    # 1/(2+3)/4
+    expr =
+      @empty_expression
+      |> Expression.add_value(1)
+      |> Expression.add_operator(:divide)
+      |> Expression.add_parentheses_encapsulated_expression(%Expression{
+        left: 2,
+        operator: :add,
+        right: 3
+      })
+      |> Expression.add_operator(:divide)
+      |> Expression.add_value(4)
+
+    assert expr == %Expression{
+             left: %Expression{
+               left: 1,
+               operator: :divide,
+               right: %Expression{within_parens: true, left: 2, operator: :add, right: 3}
+             },
+             operator: :divide,
+             right: 4
+           }
+
+    # 1-2/(3+4)
+    assert @empty_expression
+           |> Expression.add_value(1)
+           |> Expression.add_operator(:subtract)
+           |> Expression.add_value(2)
+           |> Expression.add_operator(:divide)
+           |> Expression.add_parentheses_encapsulated_expression(%Expression{
+             left: 3,
+             operator: :add,
+             right: 4
+           }) == %Expression{
+             left: 1,
+             operator: :subtract,
+             right: %Expression{
+               left: 2,
+               operator: :divide,
+               right: %Expression{within_parens: true, left: 3, operator: :add, right: 4}
              }
            }
   end
