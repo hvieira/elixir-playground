@@ -58,18 +58,33 @@ defmodule Calculator.Core.Expression do
   def add_operator(%Expression{operator: _op} = expr, op),
     do: %Expression{left: expr, operator: op}
 
+  @spec add_parentheses_encapsulated_expression(Expression.t(), Expression.t()) :: Expression.t()
+  def add_parentheses_encapsulated_expression(target_expr, encapsulated_expression)
+
+  def add_parentheses_encapsulated_expression(
+        %Expression{left: nil},
+        encapsulated_expression
+      ),
+      do: encapsulated_expression
+
   def add_parentheses_encapsulated_expression(
         %Expression{right: nil} = target_expr,
         encapsulated_expression
       ),
       do: %{target_expr | right: validate!(encapsulated_expression)}
 
-  # TODO ArgumentError here is not ideal because it is a validation error
+  def add_parentheses_encapsulated_expression(
+        %Expression{right: r},
+        _encapsulated_expression
+      ) when r != nil,
+      do: raise(ArgumentError, "Malformed expression")
+
   def validate!(nil), do: raise(ArgumentError, "Malformed expression")
   def validate!(%Expression{left: nil}), do: raise(ArgumentError, "Malformed expression")
   def validate!(%Expression{right: nil}), do: raise(ArgumentError, "Malformed expression")
   def validate!(%Expression{operator: nil}), do: raise(ArgumentError, "Malformed expression")
   def validate!(n) when is_number(n), do: n
+
   def validate!(%Expression{left: l, right: r} = expr) do
     validate!(l)
     validate!(r)

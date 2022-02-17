@@ -340,7 +340,14 @@ defmodule CalculatorExpressionTest do
            }
   end
 
-  test "can add in-parentheses expressions - adds to right" do
+  test "can add in-parentheses expressions - if expression is empty, just assume the expression" do
+    assert Expression.add_parentheses_encapsulated_expression(
+             %Expression{},
+             %Expression{left: 0, operator: :subtract, right: 3}
+           ) == %Expression{left: 0, operator: :subtract, right: 3}
+  end
+
+  test "can add in-parentheses expressions - adds to right if right is empty" do
     assert Expression.add_parentheses_encapsulated_expression(
              %Expression{left: 3, operator: :add, right: nil},
              %Expression{left: 0, operator: :subtract, right: 3}
@@ -349,6 +356,85 @@ defmodule CalculatorExpressionTest do
              operator: :add,
              right: %Expression{left: 0, operator: :subtract, right: 3}
            }
+  end
+
+  test "can add in-parentheses expressions - if expression is complete means that no operator is preceding and is then an malformed expression" do
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.add_parentheses_encapsulated_expression(
+        %Expression{left: 1, operator: :multiply, right: 2},
+        %Expression{left: 3, operator: :multiply, right: 4}
+      )
+    end
+  end
+
+  test "can add in-parentheses expressions with depth" do
+    encapsulated_expr = %Expression{
+      left: %Expression{left: 1, operator: :add, right: 2},
+      operator: :add,
+      right: %Expression{left: 3, operator: :subtract, right: 4},
+    }
+      Expression.add_parentheses_encapsulated_expression(
+        %Expression{left: 1, operator: :add, right: nil},
+        %Expression{
+          left: 1,
+          operator: :add,
+          right: encapsulated_expr
+        }
+      )
+  end
+
+  # TODO test priority of parentheses along with multiply and divide
+
+  test "can add in-parentheses expressions - only if the expressions are valid" do
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.add_parentheses_encapsulated_expression(
+        %Expression{left: 3, operator: :add, right: nil},
+        %Expression{left: nil, operator: nil, right: nil}
+      )
+    end
+
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.add_parentheses_encapsulated_expression(
+        %Expression{left: 3, operator: :add, right: nil},
+        %Expression{left: 0, operator: nil, right: nil}
+      )
+    end
+
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.add_parentheses_encapsulated_expression(
+        %Expression{left: 3, operator: :add, right: nil},
+        %Expression{left: 0, operator: :subtract, right: nil}
+      )
+    end
+
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.add_parentheses_encapsulated_expression(
+        %Expression{left: 3, operator: :add, right: nil},
+        %Expression{left: 0, operator: :subtract, right: %Expression{}}
+      )
+    end
+
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.add_parentheses_encapsulated_expression(
+        %Expression{left: 3, operator: :add, right: nil},
+        %Expression{
+          left: 0,
+          operator: :subtract,
+          right: %Expression{left: 3, operator: nil, right: nil}
+        }
+      )
+    end
+
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      Expression.add_parentheses_encapsulated_expression(
+        %Expression{left: 3, operator: :add, right: nil},
+        %Expression{
+          left: 0,
+          operator: :subtract,
+          right: %Expression{left: 3, operator: :multiply, right: nil}
+        }
+      )
+    end
   end
 
   test "validate expressions - empty or nil expressions are invalid" do
@@ -392,11 +478,12 @@ defmodule CalculatorExpressionTest do
   end
 
   test "validate expressions - having no right term in a subtree is an invalid expression" do
-    expr = @empty_expression
-    |> Expression.add_value(1)
-    |> Expression.add_operator(:add)
-    |> Expression.add_value(2)
-    |> Expression.add_operator(:multiply)
+    expr =
+      @empty_expression
+      |> Expression.add_value(1)
+      |> Expression.add_operator(:add)
+      |> Expression.add_value(2)
+      |> Expression.add_operator(:multiply)
 
     assert_raise ArgumentError, "Malformed expression", fn ->
       Expression.validate!(expr)
