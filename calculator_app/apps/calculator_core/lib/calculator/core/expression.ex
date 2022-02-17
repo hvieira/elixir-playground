@@ -73,11 +73,18 @@ defmodule Calculator.Core.Expression do
       ),
       do: %{target_expr | right: validate!(encapsulated_expression)}
 
+  # for cases where the last operator was a multiply/divide and we're waiting for a right term on the created subtree
+  def add_parentheses_encapsulated_expression(
+        %Expression{right: %Expression{right: nil}} = target_expr,
+        encapsulated_expression
+      ),
+      do: %{target_expr | right: %{target_expr.right | right: validate!(encapsulated_expression)}}
+
   def add_parentheses_encapsulated_expression(
         %Expression{right: r},
         _encapsulated_expression
       )
-      when r != nil,
+      when is_number(r) or (r != nil and r.right != nil),
       do: raise(ArgumentError, "Malformed expression")
 
   def validate!(nil), do: raise(ArgumentError, "Malformed expression")

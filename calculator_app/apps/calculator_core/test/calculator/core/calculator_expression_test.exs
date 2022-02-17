@@ -384,7 +384,39 @@ defmodule CalculatorExpressionTest do
            }
   end
 
-  test "can add in-parentheses expressions - priority along with multiply" do
+  test "can add in-parentheses expressions - takes priority over multiply" do
+    # TODO test (1-2)*3
+    # TODO test 1*(2*3)*4
+
+    # 1*(2-3)
+    assert Expression.add_parentheses_encapsulated_expression(
+             %Expression{left: 1, operator: :multiply, right: nil},
+             %Expression{left: 2, operator: :subtract, right: 3}
+           ) == %Expression{
+             left: 1,
+             operator: :multiply,
+             right: %Expression{left: 2, operator: :subtract, right: 3}
+           }
+
+    # 1-2*(3+4)
+    assert @empty_expression
+           |> Expression.add_value(1)
+           |> Expression.add_operator(:subtract)
+           |> Expression.add_value(2)
+           |> Expression.add_operator(:multiply)
+           |> Expression.add_parentheses_encapsulated_expression(%Expression{
+             left: 3,
+             operator: :add,
+             right: 4
+           }) == %Expression{
+             left: 1,
+             operator: :subtract,
+             right: %Expression{
+               left: 2,
+               operator: :multiply,
+               right: %Expression{left: 3, operator: :add, right: 4}
+             }
+           }
   end
 
   test "can add in-parentheses expressions - only if the expressions are valid" do
