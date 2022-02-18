@@ -21,15 +21,19 @@ defmodule Calculator.Core.Expression do
 
   @spec add_value(Expression.t() | number(), number()) :: Expression.t()
   def add_value(expr, n)
-  def add_value(%Expression{left: nil}, n), do: %Expression{left: n}
+  def add_value(%Expression{left: nil, operator: nil}, n), do: %Expression{left: n}
 
   def add_value(%Expression{operator: nil, right: nil}, _n),
     do: raise(ArgumentError, "Malformed expression")
 
+  def add_value(%Expression{left: nil, operator: op, right: nil} = expr, n)
+    when op in [:add, :subtract],
+      do: %{expr | left: 0, right: n, within_parens: true}
+
   def add_value(%Expression{right: nil} = expr, n), do: %{expr | right: n}
 
   # special case to allow adding values to most priority operations. See match above
-  def add_value(expr, n) when expr.right.right == nil do
+  def add_value(expr, n) when expr.right != nil and expr.right.right == nil do
     %{expr | right: %{expr.right | right: n}}
   end
 
