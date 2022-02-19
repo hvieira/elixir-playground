@@ -27,7 +27,7 @@ defmodule Calculator.Core.Expression do
     do: raise(ArgumentError, "Malformed expression")
 
   def add_value(%Expression{left: nil, operator: op, right: nil} = expr, n)
-    when op in [:add, :subtract],
+      when op in [:add, :subtract],
       do: %{expr | left: 0, right: n, within_parens: true}
 
   def add_value(%Expression{right: nil} = expr, n), do: %{expr | right: n}

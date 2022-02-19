@@ -2,13 +2,13 @@ defmodule Calculator.Core.Interpreter do
   alias Calculator.Core.Expression
 
   def interpret("") do
-    {:invalid_input, "Empty string given"}
+    {:invalid_input, "No expression given"}
   end
 
   def interpret(str) do
     with cleaned <- clean_input(str) do
       try do
-        interpret_expression(cleaned)
+        interpret_expression(cleaned, nil)
       rescue
         e in ArgumentError -> {:invalid_input, e.message}
       end
@@ -19,25 +19,53 @@ defmodule Calculator.Core.Interpreter do
     String.replace(str, " ", "", global: true)
   end
 
-  @spec interpret_expression(String.t()) ::
-          Expression.t() | number() | {:invalid_input, String.t()}
-  def interpret_expression(str) do
-    str
-    |> clean_input
-    |> interpret_expression(nil)
-  end
-
   defp interpret_expression(<<char, _::binary>> = str, nil)
        when char in ?0..?9 do
     {float, remainder_str} = Float.parse(str)
     interpret_expression(remainder_str, float)
   end
 
-  defp interpret_expression(<<?+, remainder_str::binary>>, nil),
-    do: interpret_expression(remainder_str, %Expression{left: 0, operator: :add, right: nil})
+  defp interpret_expression(<<char, remainder_str::binary>>, nil)
+       when char in [?+, ?-, ?*, ?/] do
+    operator = operator_from_char(char)
 
-  defp interpret_expression(<<?+, remainder_str::binary>>, n) when is_number(n),
-    do: interpret_expression(remainder_str, %Expression{left: n, operator: :add, right: nil})
+    expr =
+      %Expression{}
+      |> Expression.add_operator(operator)
+
+    interpret_expression(remainder_str, expr)
+  end
+
+  defp interpret_expression(<<char, remainder_str::binary>>, n)
+       when char in [?+, ?-, ?*, ?/] and is_number(n) do
+    operator = operator_from_char(char)
+
+    expr =
+      %Expression{}
+      |> Expression.add_value(n)
+      |> Expression.add_operator(operator)
+
+    interpret_expression(remainder_str, expr)
+  end
+
+  defp interpret_expression(<<char, remainder_str::binary>>, %Expression{} = expr)
+       when char in [?+, ?-, ?*, ?/] do
+    operator = operator_from_char(char)
+
+    interpret_expression(remainder_str, Expression.add_operator(expr, operator))
+  end
+
+  defp interpret_expression(<<char, _::binary>> = str, %Expression{} = expr)
+       when char in ?0..?9 do
+    {float, remainder_str} = Float.parse(str)
+    interpret_expression(remainder_str, Expression.add_value(expr, float))
+  end
+
+  #  defp interpret_expression(<<?+, remainder_str::binary>>, nil),
+  #    do: interpret_expression(remainder_str, %Expression{left: 0, operator: :add, right: nil})
+  #
+  #  defp interpret_expression(<<?+, remainder_str::binary>>, n) when is_number(n),
+  #    do: interpret_expression(remainder_str, %Expression{left: n, operator: :add, right: nil})
 
   #  defp interpret_expression(<<?+, remainder_str::binary>>, expr),
   #    do:
@@ -46,11 +74,11 @@ defmodule Calculator.Core.Interpreter do
   #        %{expr | left: expr, operator: :add, right: nil}
   #      )
 
-  defp interpret_expression(<<?-, remainder_str::binary>>, nil),
-    do: interpret_expression(remainder_str, %Expression{left: 0, operator: :subtract, right: nil})
-
-  defp interpret_expression(<<?-, remainder_str::binary>>, n) when is_number(n),
-    do: interpret_expression(remainder_str, %Expression{left: n, operator: :subtract, right: nil})
+  #  defp interpret_expression(<<?-, remainder_str::binary>>, nil),
+  #    do: interpret_expression(remainder_str, %Expression{left: 0, operator: :subtract, right: nil})
+  #
+  #  defp interpret_expression(<<?-, remainder_str::binary>>, n) when is_number(n),
+  #    do: interpret_expression(remainder_str, %Expression{left: n, operator: :subtract, right: nil})
 
   #  defp interpret_expression(<<?-, remainder_str::binary>>, expr),
   #    do:
@@ -59,76 +87,76 @@ defmodule Calculator.Core.Interpreter do
   #        %{expr | left: expr, operator: :subtract, right: nil}
   #      )
 
-  defp interpret_expression(<<char, _::binary>>, nil)
-       when char == ?* or char == ?/,
-       do: raise(ArgumentError, "Malformed expression")
-
-  defp interpret_expression(<<?*, remainder_str::binary>>, n) when is_number(n),
-    do: interpret_expression(remainder_str, %Expression{left: n, operator: :multiply, right: nil})
-
-  defp interpret_expression(<<?/, remainder_str::binary>>, n) when is_number(n),
-    do: interpret_expression(remainder_str, %Expression{left: n, operator: :divide, right: nil})
-
-  defp interpret_expression(<<?/, remainder_str::binary>>, expr),
-    do:
-      interpret_expression(
-        remainder_str,
-        %{expr | left: expr, operator: :divide, right: nil}
-      )
-
-  defp interpret_expression(<<char, _::binary>> = str, %Expression{right: nil} = expr)
-       when char in ?0..?9 do
-    {float, remainder_str} = Float.parse(str)
-    interpret_expression(remainder_str, %{expr | right: float})
-  end
+  #  defp interpret_expression(<<char, _::binary>>, nil)
+  #       when char == ?* or char == ?/,
+  #       do: raise(ArgumentError, "Malformed expression")
+  #
+  #  defp interpret_expression(<<?*, remainder_str::binary>>, n) when is_number(n),
+  #    do: interpret_expression(remainder_str, %Expression{left: n, operator: :multiply, right: nil})
+  #
+  #  defp interpret_expression(<<?/, remainder_str::binary>>, n) when is_number(n),
+  #    do: interpret_expression(remainder_str, %Expression{left: n, operator: :divide, right: nil})
+  #
+  #  defp interpret_expression(<<?/, remainder_str::binary>>, expr),
+  #    do:
+  #      interpret_expression(
+  #        remainder_str,
+  #        %{expr | left: expr, operator: :divide, right: nil}
+  #      )
+  #
+  #  defp interpret_expression(<<char, _::binary>> = str, %Expression{right: nil} = expr)
+  #       when char in ?0..?9 do
+  #    {float, remainder_str} = Float.parse(str)
+  #    interpret_expression(remainder_str, %{expr | right: float})
+  #  end
 
   # need to define priority of operations
-  defp interpret_expression(
-         <<char, remainder_str::binary>>,
-         %Expression{left: l, operator: op, right: r} = expr
-       )
-       when char in [?+, ?-, ?*, ?/] and l != nil and op != nil and r != nil do
-    operator_found = operator_from_char(char)
-
-    case op do
-      op when op in [:add, :subtract] and operator_found == :multiply ->
-        # TODO maybe this?
-        #        {expr, rest} = interpret_expression_until_normal_priority(remainder_str, %Expression{
-        #          left: r,
-        #          operator: operator_found,
-        #          right: nil
-        #        })
-
-        %Expression{
-          left: l,
-          operator: op,
-          right:
-            interpret_expression(remainder_str, %Expression{
-              left: r,
-              operator: operator_found,
-              right: nil
-            })
-        }
-
-      op when op in [:multiply] and operator_found in [:add, :subtract] ->
-        %Expression{
-          left: l,
-          operator: op,
-          right:
-            interpret_expression(remainder_str, %Expression{
-              left: r,
-              operator: operator_found,
-              right: nil
-            })
-        }
-
-      _ ->
-        interpret_expression(
-          remainder_str,
-          %{expr | left: expr, operator: operator_found, right: nil}
-        )
-    end
-  end
+  #  defp interpret_expression(
+  #         <<char, remainder_str::binary>>,
+  #         %Expression{left: l, operator: op, right: r} = expr
+  #       )
+  #       when char in [?+, ?-, ?*, ?/] and l != nil and op != nil and r != nil do
+  #    operator_found = operator_from_char(char)
+  #
+  #    case op do
+  #      op when op in [:add, :subtract] and operator_found == :multiply ->
+  #        # TODO maybe this?
+  #        #        {expr, rest} = interpret_expression_until_normal_priority(remainder_str, %Expression{
+  #        #          left: r,
+  #        #          operator: operator_found,
+  #        #          right: nil
+  #        #        })
+  #
+  #        %Expression{
+  #          left: l,
+  #          operator: op,
+  #          right:
+  #            interpret_expression(remainder_str, %Expression{
+  #              left: r,
+  #              operator: operator_found,
+  #              right: nil
+  #            })
+  #        }
+  #
+  #      op when op in [:multiply] and operator_found in [:add, :subtract] ->
+  #        %Expression{
+  #          left: l,
+  #          operator: op,
+  #          right:
+  #            interpret_expression(remainder_str, %Expression{
+  #              left: r,
+  #              operator: operator_found,
+  #              right: nil
+  #            })
+  #        }
+  #
+  #      _ ->
+  #        interpret_expression(
+  #          remainder_str,
+  #          %{expr | left: expr, operator: operator_found, right: nil}
+  #        )
+  #    end
+  #  end
 
   #  defp interpret_expression(<<char, remainder_str :: binary>>, expr)
   #    when char in [?+, ?-] do
@@ -278,10 +306,11 @@ defmodule Calculator.Core.Interpreter do
   #
   #  # ending states
   #  defp interpret_expression("", %Expression{left: left, operator: nil, right: nil}), do: left
-  defp interpret_expression("", %Expression{right: nil}),
-    do: raise(ArgumentError, "Malformed expression")
-
-  defp interpret_expression("", captured_expr), do: captured_expr
+  #  defp interpret_expression("", %Expression{right: nil}),
+  #    do: raise(ArgumentError, "Malformed expression")
+  #
+  defp interpret_expression("", built_expr) when is_number(built_expr), do: built_expr
+  defp interpret_expression("", built_expr), do: Expression.validate!(built_expr)
   #
   #  # utilities
   #  defp capture_enclosed_expression(str, captured \\ [], level \\ 0)

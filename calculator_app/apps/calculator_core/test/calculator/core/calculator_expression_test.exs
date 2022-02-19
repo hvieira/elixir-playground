@@ -519,15 +519,17 @@ defmodule CalculatorExpressionTest do
   end
 
   test "build signed numbers as expression withing parentheses" do
-    expr = @empty_expression
-    |> Expression.add_operator(:subtract)
-    |> Expression.add_value(8)
+    expr =
+      @empty_expression
+      |> Expression.add_operator(:subtract)
+      |> Expression.add_value(8)
 
     assert expr == %Expression{within_parens: true, left: 0, operator: :subtract, right: 8}
 
-    expr = @empty_expression
-           |> Expression.add_operator(:add)
-           |> Expression.add_value(0.8)
+    expr =
+      @empty_expression
+      |> Expression.add_operator(:add)
+      |> Expression.add_value(0.8)
 
     assert expr == %Expression{within_parens: true, left: 0, operator: :add, right: 0.8}
   end
