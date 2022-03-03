@@ -340,7 +340,12 @@ defmodule CalculatorExpressionTest do
            }
   end
 
-  test "can add in-parentheses expressions - if expression is empty, just assume the expression" do
+  test "can add in-parentheses expressions - if expression is empty or nil, just assume the expression" do
+    assert Expression.add_parentheses_encapsulated_expression(
+             nil,
+             %Expression{left: 0, operator: :subtract, right: 3}
+           ) == %Expression{within_parens: true, left: 0, operator: :subtract, right: 3}
+
     assert Expression.add_parentheses_encapsulated_expression(
              %Expression{},
              %Expression{left: 0, operator: :subtract, right: 3}
@@ -646,6 +651,17 @@ defmodule CalculatorExpressionTest do
         operator: nil,
         right: 3
       })
+    end
+  end
+
+  test "validate expressions - subsequent operators like multiply and divide" do
+    assert_raise ArgumentError, "Malformed expression", fn ->
+      @empty_expression
+      |> Expression.add_value(1)
+      |> Expression.add_operator(:divide)
+      |> Expression.add_operator(:divide)
+      |> Expression.add_value(1)
+      |> Expression.validate!()
     end
   end
 

@@ -358,121 +358,108 @@ defmodule CalculatorInterpreterTest do
     assert match?({:invalid_input, _}, Interpreter.interpret("1 +"))
   end
 
-  #
-  #  test "can interpret expressions within parentheses - single enclosed expression" do
-  #    assert Interpreter.interpret_expression("(3+5)") ==
-  #             %Expression{
-  #               within_parens: true,
-  #               left: 3,
-  #               operator: :add,
-  #               right: 5
-  #             }
-  #
-  #    assert Interpreter.interpret_expression("(3+5-8*5/1)") ==
-  #             %Expression{
-  #               within_parens: true,
-  #               left: %Expression{left: 3, operator: :add, right: 5},
-  #               operator: :subtract,
-  #               right: %Expression{
-  #                 left: %Expression{left: 8, operator: :multiply, right: 5},
-  #                 operator: :divide,
-  #                 right: 1
-  #               }
-  #             }
-  #  end
-  #
-  #  test "can interpret expressions with parentheses - multiple enclosed expression" do
-  #    assert Interpreter.interpret_expression("(3+5)/(8-0)") ==
-  #             %Expression{
-  #               left: %Expression{within_parens: true, left: 3, operator: :add, right: 5},
-  #               operator: :divide,
-  #               right: %Expression{within_parens: true, left: 8, operator: :subtract, right: 0}
-  #             }
-  #
-  #    assert Interpreter.interpret_expression("(3+5)/(8-0)-1") ==
-  #             %Expression{
-  #               within_parens: false,
-  #               left: %Expression{
-  #                 left: %Expression{within_parens: true, left: 3, operator: :add, right: 5},
-  #                 operator: :divide,
-  #                 right: %Expression{within_parens: true, left: 8, operator: :subtract, right: 0}
-  #               },
-  #               operator: :subtract,
-  #               right: 1
-  #             }
-  #
-  #    assert Interpreter.interpret_expression("(3+5)/(8-0)*(300+7)") ==
-  #             %Expression{
-  #               within_parens: false,
-  #               left: %Expression{
-  #                 left: %Expression{within_parens: true, left: 3, operator: :add, right: 5},
-  #                 operator: :divide,
-  #                 right: %Expression{within_parens: true, left: 8, operator: :subtract, right: 0}
-  #               },
-  #               operator: :multiply,
-  #               right: %Expression{within_parens: true, left: 300, operator: :add, right: 7}
-  #             }
-  #  end
-  #
-  #  test "can interpret expressions with nested parentheses" do
-  #    assert Interpreter.interpret_expression("((4+7)-1)") ==
-  #             %Expression{
-  #               within_parens: true,
-  #               left: %Expression{within_parens: true, left: 4, operator: :add, right: 7},
-  #               operator: :subtract,
-  #               right: 1
-  #             }
-  #
-  #    assert Interpreter.interpret_expression("(1+(4+7))-(1/(1*1))") ==
-  #             %Expression{
-  #               left: %Expression{
-  #                 within_parens: true,
-  #                 left: 1,
-  #                 operator: :add,
-  #                 right: %Expression{
-  #                   within_parens: true,
-  #                   left: 4,
-  #                   operator: :add,
-  #                   right: 7
-  #                 }
-  #               },
-  #               operator: :subtract,
-  #               right: %Expression{
-  #                 within_parens: true,
-  #                 left: 1,
-  #                 operator: :divide,
-  #                 right: %Expression{within_parens: true, left: 1, operator: :multiply, right: 1}
-  #               }
-  #             }
-  #  end
+  test "can interpret expressions within parentheses - single enclosed expression" do
+    assert Interpreter.interpret("(3+5)") ==
+             %Expression{
+               within_parens: true,
+               left: 3,
+               operator: :add,
+               right: 5
+             }
 
-  #  test "raises when subsequent signs are invalid" do
-  #    assert_raise ArgumentError, "Malformed expression", fn ->
-  #      Interpreter.interpret_expression("1//1")
-  #    end
-  #
-  #    assert_raise ArgumentError, "Malformed expression", fn ->
-  #      Interpreter.interpret_expression("1+//1")
-  #    end
-  #
-  #    assert_raise ArgumentError, "Malformed expression", fn ->
-  #      Interpreter.interpret_expression("1-//1")
-  #    end
-  #
-  #    assert_raise ArgumentError, "Malformed expression", fn ->
-  #      Interpreter.interpret_expression("1**1")
-  #    end
-  #  end
-  #
-  #  test "raises when parentheses are unbalanced" do
-  #    expected_error_msg = "Malformed expression. Parentheses are unbalanced"
-  #
-  #    assert_raise ArgumentError, expected_error_msg, fn ->
-  #      Interpreter.interpret_expression("(1+1")
-  #    end
-  #
-  #    assert_raise ArgumentError, expected_error_msg, fn ->
-  #      Interpreter.interpret_expression("((1+1)((0+0)")
-  #    end
-  #  end
+    assert Interpreter.interpret("(3+5-8*5/1)") ==
+             %Expression{
+               within_parens: true,
+               left: %Expression{left: 3, operator: :add, right: 5},
+               operator: :subtract,
+               right: %Expression{
+                 left: %Expression{left: 8, operator: :multiply, right: 5},
+                 operator: :divide,
+                 right: 1
+               }
+             }
+  end
+
+  test "can interpret expressions with parentheses - multiple enclosed expression" do
+    assert Interpreter.interpret("(3+5)/(8-0)") ==
+             %Expression{
+               left: %Expression{within_parens: true, left: 3, operator: :add, right: 5},
+               operator: :divide,
+               right: %Expression{within_parens: true, left: 8, operator: :subtract, right: 0}
+             }
+
+    assert Interpreter.interpret("(3+5)/(8-0)-1") ==
+             %Expression{
+               within_parens: false,
+               left: %Expression{
+                 left: %Expression{within_parens: true, left: 3, operator: :add, right: 5},
+                 operator: :divide,
+                 right: %Expression{within_parens: true, left: 8, operator: :subtract, right: 0}
+               },
+               operator: :subtract,
+               right: 1
+             }
+
+    assert Interpreter.interpret("(3+5)/(8-0)*(300+7)") ==
+             %Expression{
+               within_parens: false,
+               left: %Expression{
+                 left: %Expression{within_parens: true, left: 3, operator: :add, right: 5},
+                 operator: :divide,
+                 right: %Expression{within_parens: true, left: 8, operator: :subtract, right: 0}
+               },
+               operator: :multiply,
+               right: %Expression{within_parens: true, left: 300, operator: :add, right: 7}
+             }
+  end
+
+  test "can interpret expressions with nested parentheses" do
+    assert Interpreter.interpret("((4+7)-1)") ==
+             %Expression{
+               within_parens: true,
+               left: %Expression{within_parens: true, left: 4, operator: :add, right: 7},
+               operator: :subtract,
+               right: 1
+             }
+
+    assert Interpreter.interpret("(1+(4+7))-(1/(1*1))") ==
+             %Expression{
+               left: %Expression{
+                 within_parens: true,
+                 left: 1,
+                 operator: :add,
+                 right: %Expression{
+                   within_parens: true,
+                   left: 4,
+                   operator: :add,
+                   right: 7
+                 }
+               },
+               operator: :subtract,
+               right: %Expression{
+                 within_parens: true,
+                 left: 1,
+                 operator: :divide,
+                 right: %Expression{within_parens: true, left: 1, operator: :multiply, right: 1}
+               }
+             }
+  end
+
+    test "invalid input when subsequent signs are invalid" do
+      assert match?({:invalid_input, _}, Interpreter.interpret("1//1"))
+      assert match?({:invalid_input, _}, Interpreter.interpret("1+//1"))
+      assert match?({:invalid_input, _}, Interpreter.interpret("1-//1"))
+      assert match?({:invalid_input, _}, Interpreter.interpret("1**1"))
+      assert match?({:invalid_input, _}, Interpreter.interpret("1+**1"))
+      assert match?({:invalid_input, _}, Interpreter.interpret("1-**1"))
+    end
+
+    test "invalid input when parentheses are unbalanced" do
+      expected_error_msg = "Malformed expression. Parentheses are unbalanced"
+
+      assert Interpreter.interpret("(1+1") == {:invalid_input, expected_error_msg}
+      assert Interpreter.interpret("1+1)") == {:invalid_input, expected_error_msg}
+      assert Interpreter.interpret("((1+1((0+0))") == {:invalid_input, expected_error_msg}
+      assert Interpreter.interpret("((1+1)((0+0)") == {:invalid_input, expected_error_msg}
+    end
 end

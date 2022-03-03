@@ -6,13 +6,13 @@ defmodule Calculator.Core.Interpreter do
   end
 
   def interpret(str) do
-      try do
-        str
-        |> interpret_expression(nil)
-        |> Expression.validate!()
-      rescue
-        e in ArgumentError -> {:invalid_input, e.message}
-      end
+    try do
+      str
+      |> interpret_expression(nil)
+      |> Expression.validate!()
+    rescue
+      e in ArgumentError -> {:invalid_input, e.message}
+    end
   end
 
   defp interpret_expression(<<char, _::binary>> = str, nil)
@@ -57,28 +57,44 @@ defmodule Calculator.Core.Interpreter do
     interpret_expression(remainder_str, Expression.add_value(expr, float))
   end
 
+  defp interpret_expression(<<?(, rest::binary>>, expr) do
+    {enclosed_expr, remainder} = capture_enclosed_expression(rest)
+
+    interpret_expression(
+      remainder,
+      Expression.add_parentheses_encapsulated_expression(expr, enclosed_expr)
+    )
+  end
+
+  defp interpret_expression(<<?), _::binary>>, _expr),
+       do: raise(ArgumentError, "Malformed expression. Parentheses are unbalanced")
+
   defp interpret_expression("", built_expr) when is_number(built_expr), do: built_expr
   defp interpret_expression("", built_expr), do: Expression.validate!(built_expr)
-  #
-  #  # utilities
-  #  defp capture_enclosed_expression(str, captured \\ [], level \\ 0)
-  #
-  #  defp capture_enclosed_expression(<<?), rest::binary>>, captured, 0),
-  #    do: {List.to_string(captured), rest}
-  #
-  #  defp capture_enclosed_expression(<<?), rest::binary>>, captured, level),
-  #    do: capture_enclosed_expression(rest, captured ++ [?)], level - 1)
-  #
-  #  defp capture_enclosed_expression(<<?(, rest::binary>>, captured, level),
-  #    do: capture_enclosed_expression(rest, captured ++ [?(], level + 1)
-  #
-  #  defp capture_enclosed_expression(<<char, rest::binary>>, captured, level),
-  #    do: capture_enclosed_expression(rest, captured ++ [char], level)
-  #
-  #  defp capture_enclosed_expression("", _captured, _level),
-  #    do: raise(ArgumentError, "Malformed expression. Parentheses are unbalanced")
 
-  defp interpret_expression(str, _expr), do: raise ArgumentError, "Cannot interpret expression #{str}"
+  defp interpret_expression(str, _expr),
+       do: raise(ArgumentError, "Cannot interpret expression #{str}")
+
+  # utilities
+  defp capture_enclosed_expression(str, captured \\ [], level \\ 0)
+
+  defp capture_enclosed_expression(<<?), rest::binary>>, captured, 0),
+    do: {
+      interpret_expression(List.to_string(captured), nil),
+      rest
+    }
+
+  defp capture_enclosed_expression(<<?), rest::binary>>, captured, level),
+    do: capture_enclosed_expression(rest, captured ++ [?)], level - 1)
+
+  defp capture_enclosed_expression(<<?(, rest::binary>>, captured, level),
+    do: capture_enclosed_expression(rest, captured ++ [?(], level + 1)
+
+  defp capture_enclosed_expression(<<char, rest::binary>>, captured, level),
+    do: capture_enclosed_expression(rest, captured ++ [char], level)
+
+  defp capture_enclosed_expression("", _captured, _level),
+    do: raise(ArgumentError, "Malformed expression. Parentheses are unbalanced")
 
   defp operator_from_char(?+), do: :add
   defp operator_from_char(?-), do: :subtract

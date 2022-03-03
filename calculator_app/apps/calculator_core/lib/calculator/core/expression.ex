@@ -69,9 +69,10 @@ defmodule Calculator.Core.Expression do
   def add_parentheses_encapsulated_expression(target_expr, encapsulated_expression)
 
   def add_parentheses_encapsulated_expression(
-        %Expression{left: nil},
+        target_expr,
         encapsulated_expression
-      ),
+      )
+      when target_expr == nil or target_expr.left == nil,
       do: enforce_parentheses_encapsulation(encapsulated_expression)
 
   def add_parentheses_encapsulated_expression(
