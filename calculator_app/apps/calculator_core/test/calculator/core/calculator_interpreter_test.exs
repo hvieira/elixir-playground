@@ -338,27 +338,25 @@ defmodule CalculatorInterpreterTest do
              }
   end
 
-  #
-  #    test "handles bad input" do
-  #      assert match?({:invalid_input, _}, Interpreter.interpret("", @default_decimal_factor))
-  #      assert match?({:invalid_input, _}, Interpreter.interpret("hack", @default_decimal_factor))
-  #      assert match?({:invalid_input, _}, Interpreter.interpret("l33t", @default_decimal_factor))
-  #      assert match?({:invalid_input, _}, Interpreter.interpret("l3+3t", @default_decimal_factor))
-  #      assert match?({:invalid_input, _}, Interpreter.interpret("l33t/2", @default_decimal_factor))
-  #      assert match?({:invalid_input, _}, Interpreter.interpret("1/2l33t", @default_decimal_factor))
-  #
-  #      assert match?(
-  #               {:invalid_input, _},
-  #               Interpreter.interpret("1 + some random text", @default_decimal_factor)
-  #             )
-  #
-  #      assert match?({:invalid_input, _}, Interpreter.interpret("1 # 2", @default_decimal_factor))
-  #      assert match?({:invalid_input, _}, Interpreter.interpret("1 \\ 2", @default_decimal_factor))
-  #      assert match?({:invalid_input, _}, Interpreter.interpret("1 2", @default_decimal_factor))
-  #
-  #      assert match?({:invalid_input, _}, Interpreter.interpret("1 +", @default_decimal_factor))
-  #      assert match?({:invalid_input, _}, Interpreter.interpret("+1", @default_decimal_factor))
-  #    end
+  test "handles bad input" do
+    assert match?({:invalid_input, _}, Interpreter.interpret(""))
+    assert match?({:invalid_input, _}, Interpreter.interpret("hack"))
+    assert match?({:invalid_input, _}, Interpreter.interpret("l33t"))
+    assert match?({:invalid_input, _}, Interpreter.interpret("l3+3t"))
+    assert match?({:invalid_input, _}, Interpreter.interpret("l33t/2"))
+    assert match?({:invalid_input, _}, Interpreter.interpret("1/2l33t"))
+
+    assert match?(
+             {:invalid_input, _},
+             Interpreter.interpret("1 + some random text")
+           )
+
+    assert match?({:invalid_input, _}, Interpreter.interpret("1 # 2"))
+    assert match?({:invalid_input, _}, Interpreter.interpret("1 \\ 2"))
+    assert match?({:invalid_input, _}, Interpreter.interpret("1 2"))
+
+    assert match?({:invalid_input, _}, Interpreter.interpret("1 +"))
+  end
 
   #
   #  test "can interpret expressions within parentheses - single enclosed expression" do
