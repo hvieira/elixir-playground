@@ -67,13 +67,13 @@ defmodule Calculator.Core.Interpreter do
   end
 
   defp interpret_expression(<<?), _::binary>>, _expr),
-       do: raise(ArgumentError, "Malformed expression. Parentheses are unbalanced")
+    do: raise(ArgumentError, "Malformed expression. Parentheses are unbalanced")
 
   defp interpret_expression("", built_expr) when is_number(built_expr), do: built_expr
   defp interpret_expression("", built_expr), do: Expression.validate!(built_expr)
 
   defp interpret_expression(str, _expr),
-       do: raise(ArgumentError, "Cannot interpret expression #{str}")
+    do: raise(ArgumentError, "Cannot interpret expression #{str}")
 
   # utilities
   defp capture_enclosed_expression(str, captured \\ [], level \\ 0)

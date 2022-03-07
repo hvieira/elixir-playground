@@ -1,8 +1,6 @@
 defmodule Calculator.Core do
   use Application
 
-  @decimal_factor 1000
-
   def start(_type, _args) do
     children = [
       {Calculator.Core.AddAgent, name: Calculator.Core.AddAgent},
@@ -33,25 +31,25 @@ defmodule Calculator.Core do
 
   @spec calculate(String.t()) :: {:ok, String.t()} | {:invalid_input, String.t()}
   def calculate(calculation_str) do
+    alias Calculator.Core.Expression
     alias Calculator.Core.Interpreter
 
-    with {:ok, %{n1: number1, operator: operator, n2: number2}} <-
-           Interpreter.interpret(calculation_str, @decimal_factor) do
-      # TODO At this point we can probably just call the function in this module given by the atom in the operation
-      # https://stackoverflow.com/a/36679477
+    %Expression{left: number1, operator: operator, right: number2} =
+      Interpreter.interpret(calculation_str)
 
-      # TODO looking at the decimal factor usage, it might be an indication that it might need to be refactored
-      int_value =
-        case operator do
-          :add -> add(number1, number2)
-          :subtract -> subtract(number1, number2)
-          :multiply -> multiply(number1, number2 / @decimal_factor)
-          :divide -> divide(number1, number2 / @decimal_factor)
-        end
+    # TODO At this point we can probably just call the function in this module given by the atom in the operation
+    # https://stackoverflow.com/a/36679477
 
-      # TODO define a maximum of decimal places in the result - e.g 5
-      # The proper thing to do is to use a Decimal lib https://hexdocs.pm/decimal/Decimal.html
-      {:ok, "#{int_value / @decimal_factor}"}
-    end
+    result =
+      case operator do
+        :add -> add(number1, number2)
+        :subtract -> subtract(number1, number2)
+        :multiply -> multiply(number1, number2)
+        :divide -> divide(number1, number2)
+      end
+
+    # TODO define a maximum of decimal places in the result - e.g 5
+    # The proper thing to do is to use a Decimal lib https://hexdocs.pm/decimal/Decimal.html
+    {:ok, Float.round(result, 5)}
   end
 end

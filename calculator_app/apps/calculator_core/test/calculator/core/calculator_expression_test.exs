@@ -3,8 +3,6 @@ defmodule CalculatorExpressionTest do
 
   alias Calculator.Core.Expression
 
-  @default_decimal_factor 1000
-
   @empty_expression %Expression{}
 
   test "values added are left when the expression is empty" do

@@ -445,21 +445,21 @@ defmodule CalculatorInterpreterTest do
              }
   end
 
-    test "invalid input when subsequent signs are invalid" do
-      assert match?({:invalid_input, _}, Interpreter.interpret("1//1"))
-      assert match?({:invalid_input, _}, Interpreter.interpret("1+//1"))
-      assert match?({:invalid_input, _}, Interpreter.interpret("1-//1"))
-      assert match?({:invalid_input, _}, Interpreter.interpret("1**1"))
-      assert match?({:invalid_input, _}, Interpreter.interpret("1+**1"))
-      assert match?({:invalid_input, _}, Interpreter.interpret("1-**1"))
-    end
+  test "invalid input when subsequent signs are invalid" do
+    assert match?({:invalid_input, _}, Interpreter.interpret("1//1"))
+    assert match?({:invalid_input, _}, Interpreter.interpret("1+//1"))
+    assert match?({:invalid_input, _}, Interpreter.interpret("1-//1"))
+    assert match?({:invalid_input, _}, Interpreter.interpret("1**1"))
+    assert match?({:invalid_input, _}, Interpreter.interpret("1+**1"))
+    assert match?({:invalid_input, _}, Interpreter.interpret("1-**1"))
+  end
 
-    test "invalid input when parentheses are unbalanced" do
-      expected_error_msg = "Malformed expression. Parentheses are unbalanced"
+  test "invalid input when parentheses are unbalanced" do
+    expected_error_msg = "Malformed expression. Parentheses are unbalanced"
 
-      assert Interpreter.interpret("(1+1") == {:invalid_input, expected_error_msg}
-      assert Interpreter.interpret("1+1)") == {:invalid_input, expected_error_msg}
-      assert Interpreter.interpret("((1+1((0+0))") == {:invalid_input, expected_error_msg}
-      assert Interpreter.interpret("((1+1)((0+0)") == {:invalid_input, expected_error_msg}
-    end
+    assert Interpreter.interpret("(1+1") == {:invalid_input, expected_error_msg}
+    assert Interpreter.interpret("1+1)") == {:invalid_input, expected_error_msg}
+    assert Interpreter.interpret("((1+1((0+0))") == {:invalid_input, expected_error_msg}
+    assert Interpreter.interpret("((1+1)((0+0)") == {:invalid_input, expected_error_msg}
+  end
 end
