@@ -1,12 +1,3 @@
-*/_build
-/cover
-/deps
-/doc
-*.beam
-/config/*.secret.exs
-.elixir_ls/
-*.iml
-
 # The directory Mix will write compiled artifacts to.
 /_build/
 
