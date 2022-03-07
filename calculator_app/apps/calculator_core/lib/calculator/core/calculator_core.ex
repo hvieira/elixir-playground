@@ -13,6 +13,7 @@ defmodule Calculator.Core do
     Supervisor.start_link(children, opts)
   end
 
+  # TODO (minor) probably it might make sense to move the agents under the resolver namespace and move these functions to the resolver itself
   def add(n1, n2) do
     GenServer.call(Calculator.Core.AddAgent, {:add, n1, n2})
   end
@@ -31,25 +32,13 @@ defmodule Calculator.Core do
 
   @spec calculate(String.t()) :: {:ok, String.t()} | {:invalid_input, String.t()}
   def calculate(calculation_str) do
-    alias Calculator.Core.Expression
     alias Calculator.Core.Interpreter
-
-    %Expression{left: number1, operator: operator, right: number2} =
-      Interpreter.interpret(calculation_str)
-
-    # TODO At this point we can probably just call the function in this module given by the atom in the operation
-    # https://stackoverflow.com/a/36679477
+    alias Calculator.Core.Resolver
 
     result =
-      case operator do
-        :add -> add(number1, number2)
-        :subtract -> subtract(number1, number2)
-        :multiply -> multiply(number1, number2)
-        :divide -> divide(number1, number2)
-      end
+      Interpreter.interpret(calculation_str)
+      |> Resolver.resolve()
 
-    # TODO define a maximum of decimal places in the result - e.g 5
-    # The proper thing to do is to use a Decimal lib https://hexdocs.pm/decimal/Decimal.html
     {:ok, Float.round(result, 5)}
   end
 end

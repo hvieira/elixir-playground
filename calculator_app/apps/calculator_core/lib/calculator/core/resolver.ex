@@ -9,15 +9,7 @@ defmodule Calculator.Core.Resolver do
   defp resolve_expression(n) when is_number(n),
     do: n
 
-  defp resolve_expression(%Expression{left: l, operator: :add, right: r}),
-    do: resolve_expression(l) + resolve_expression(r)
-
-  defp resolve_expression(%Expression{left: l, operator: :subtract, right: r}),
-    do: resolve_expression(l) - resolve_expression(r)
-
-  defp resolve_expression(%Expression{left: l, operator: :multiply, right: r}),
-    do: resolve_expression(l) * resolve_expression(r)
-
-  defp resolve_expression(%Expression{left: l, operator: :divide, right: r}),
-    do: resolve_expression(l) / resolve_expression(r)
+  defp resolve_expression(%Expression{left: l, operator: op, right: r}) do
+    apply(Calculator.Core, op, [resolve_expression(l), resolve_expression(r)])
+  end
 end
