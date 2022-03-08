@@ -18,12 +18,20 @@ defmodule CalculatorWebWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+
+    get "/static-calculator", CalculatorController, :js_calculator
   end
 
   # Other scopes may use custom stacks.
   # scope "/api", CalculatorWebWeb do
   #   pipe_through :api
   # end
+
+  scope "/live", CalculatorWebWeb do
+    pipe_through :browser
+
+    live "/calculator", CalculatorLive
+  end
 
   # Enables LiveDashboard only for development
   #

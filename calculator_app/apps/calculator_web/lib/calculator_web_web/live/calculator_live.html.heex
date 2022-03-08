@@ -1,0 +1,24 @@
+<div class="calculator">
+    <span id="result" class="result"><%= @result %></span>
+    <span id="expression" class="expression"><%= @expression %></span>
+
+    <button class="delete" phx-click="clean">C</button>
+    <button class="open-parentheses" phx-value-char="(" phx-click="add_char">(</button>
+    <button class="close-parentheses" phx-value-char=")" phx-click="add_char">)</button>
+    <div class="empty"> </div>
+
+    <button class="number7" phx-value-char="7" phx-click="add_char">7</button>
+    <button class="number8" phx-value-char="8" phx-click="add_char">8</button>
+    <button class="number9" phx-value-char="9" phx-click="add_char">9</button>
+    <button class="add" phx-value-char="+" phx-click="add_char">+</button>
+    <button class="subtract" phx-value-char="-" phx-click="add_char">-</button>
+    <button class="number4" phx-value-char="4" phx-click="add_char">4</button>
+    <button class="number5" phx-value-char="5" phx-click="add_char">5</button>
+    <button class="number6" phx-value-char="6" phx-click="add_char">6</button>
+    <button class="multiply" phx-value-char="*" phx-click="add_char">*</button>
+    <button class="divide" phx-value-char="/" phx-click="add_char">/</button>
+    <button class="number1" phx-value-char="1" phx-click="add_char">1</button>
+    <button class="number2" phx-value-char="2" phx-click="add_char">2</button>
+    <button class="number3" phx-value-char="3" phx-click="add_char">3</button>
+    <button class="calculate" phx-click="calculate">=</button>
+</div>

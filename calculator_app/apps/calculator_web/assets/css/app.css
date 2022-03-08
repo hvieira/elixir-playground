@@ -1,6 +1,63 @@
 /* This file is for your main application CSS */
 @import "./phoenix.css";
 
+.calculator {
+    display: grid;
+    gap: 10px;
+    min-width: 400px;
+    grid-template-areas:
+        'result result result result result'
+        'expression expression expression expression expression'
+        'delete open-parentheses close-parentheses empty empty'
+        'number7 number8 number9 add subtract'
+        'number4 number5 number6 divide multiply'
+        'number1 number2 number3 calculate calculate';
+
+    padding: 10px;
+}
+
+.calculator .expression {
+    grid-area: expression;
+    min-height: 50px;
+    border: 5px solid black;
+    text-align: right;
+}
+.calculator .result {
+    grid-area: result;
+    min-height: 50px;
+    text-align: right;
+    font-size: 40px;
+}
+.calculator button {
+    font-size: 25px;
+}
+.calculator .delete {
+    grid-area: delete;
+}
+.calculator .open-parentheses {
+    grid-area: open-parentheses;
+}
+.calculator .close-parentheses {
+    grid-area: close-parentheses;
+}
+.calculator .number {
+    grid-area: number;
+}
+.calculator .operator {
+    grid-area: operator;
+}
+.calculator .calculate {
+    grid-area: calculate;
+}
+
+.calculator .empty { grid-area: empty; }
+
+
+
+
+
+
+
 /* Alerts and form errors used by phx.new */
 .alert {
   padding: 15px;
