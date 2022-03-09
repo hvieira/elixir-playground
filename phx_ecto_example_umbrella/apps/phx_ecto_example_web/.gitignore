@@ -1,12 +1,3 @@
-*/_build
-/cover
-/deps
-/doc
-*.beam
-/config/*.secret.exs
-.elixir_ls/
-*.iml
-
 # The directory Mix will write compiled artifacts to.
 /_build/
 
@@ -29,7 +20,7 @@ erl_crash.dump
 *.ez
 
 # Ignore package tarball (built via "mix hex.build").
-calculator_web-*.tar
+phx_ecto_example_web-*.tar
 
 # Ignore assets that are produced by build tools.
 /priv/static/assets/
@@ -40,6 +31,4 @@ calculator_web-*.tar
 # In case you use Node.js/npm, you want to ignore these.
 npm-debug.log
 /assets/node_modules/
-
-docker_data/
 
