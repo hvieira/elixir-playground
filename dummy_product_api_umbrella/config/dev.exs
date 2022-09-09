@@ -8,7 +8,8 @@ config :dummy_product_api, DummyProductApi.Repo,
   database: "dummy_product_api_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: 10,
+  migration_primary_key: [name: :id, type: :binary_id]
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
