@@ -7,6 +7,7 @@ defmodule DummyProductApi.Product do
     field :description, :string
     field :name, :string
     field :value, :integer
+    belongs_to :owner, DummyProductApi.User
 
     timestamps()
   end
@@ -15,6 +16,7 @@ defmodule DummyProductApi.Product do
   def changeset(product, attrs) do
     product
     |> cast(attrs, [:name, :description, :value])
-    |> validate_required([:name, :description, :value])
+    |> cast_assoc(:owner)
+    |> validate_required([:name, :description, :value, :owner])
   end
 end
