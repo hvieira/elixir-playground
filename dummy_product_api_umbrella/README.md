@@ -36,7 +36,11 @@ where a user ownership of the product is defined.
 The relevant models needed to be updated as well. In essence, the `belongs_to` and `has_many` defines the ownership (the relationship)
 between the records. The products belong to a user. Also, the `belongs_to` function suffixes the name with `_id` to match the column name
 and the `has_many` needs to define the foreign_key if it does not match the default, which in this case would be `user_id`.
+
 > defaults to the underscored name of the current schema suffixed by _id.
+
+In essence, because I'm using foreign key (in the DB) that is not a "standard" - `user_id` - but actually `owner_id` then this customization is necessary. 
+
 ```
 schema "products" do
     (...)
