@@ -5,7 +5,7 @@ defmodule DummyProductApi.User do
 
   schema "users" do
     field :name, :string
-    has_many :products, DummyProductApi.Product, foreign_key: :owner_id
+    has_many :products, DummyProductApi.Product, foreign_key: :owner_user_id
 
     timestamps()
   end

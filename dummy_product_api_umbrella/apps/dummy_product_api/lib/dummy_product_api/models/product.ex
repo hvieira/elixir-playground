@@ -7,7 +7,7 @@ defmodule DummyProductApi.Product do
     field :description, :string
     field :name, :string
     field :value, :integer
-    belongs_to :owner, DummyProductApi.User
+    belongs_to :owner_user, DummyProductApi.User
 
     timestamps()
   end

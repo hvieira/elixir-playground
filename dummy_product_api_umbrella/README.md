@@ -66,6 +66,30 @@ new_product = inserted_user |> Ecto.build_assoc(:products, %{name: "bananas", de
 new_product |> DummyProductApi.Repo.insert()
 ```
 
+## Renaming columns + more on migrations
+if the migration is something simple - like adding a column, then we can just use `change`, but for things even slightly more complex
+than that, `up` and `down` provides more control on what it is we want to do.
+
+Renaming a column is simple with `rename` - https://hexdocs.pm/ecto_sql/Ecto.Migration.html#rename/3 - but if we need to rename the foreign keys and underlying indexes, we'll need to drop the constraint to use the DSL. An alternative is to use `execute` to run SQL
+commands, which will allow a rename of a constraint.
+
+**NOTE: normally one wouldn't rename a column like this in a production system, but actually make (at least) a 2 step migration with a new column and then remove the old one once everything is moved over**
+
+Naming constraints explicitly can also be a good thing to do, even if it matches the default. This way even if the library changes, or the tool to make migrations changes, the names of the constraints are known and explicit.
+
+
+## up-to-date iex commands
+Leaving previous commands in their versions because they make sense and provide context on the code at the point in time they were created, but they evolve with the changes. So this section just has up-to-date commands
+
+```
+alias DummyProductApi.User
+{:ok,inserted_user} = %User{} |> User.changeset(%{name: "John Doe"}) |> DummyProductApi.Repo.insert()
+
+alias DummyProductApi.Product
+new_product = inserted_user |> Ecto.build_assoc(:products, %{name: "bananas", description: "green", value: 0})
+new_product |> DummyProductApi.Repo.insert()
+```
+
 ### TO REMOVE ONCE THINGS ARE PROPER
 
 To start your Phoenix server:
