@@ -43,3 +43,5 @@ npm-debug.log
 
 docker_data/
 
+# IDEs
+/.idea/
