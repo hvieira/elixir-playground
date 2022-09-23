@@ -77,6 +77,45 @@ commands, which will allow a rename of a constraint.
 
 Naming constraints explicitly can also be a good thing to do, even if it matches the default. This way even if the library changes, or the tool to make migrations changes, the names of the constraints are known and explicit.
 
+## Querying
+Preloading associations will work as such
+```
+import Ecto.Query, only: [from: 2]
+alias DummyProductApi.Product
+alias DummyProductApi.User
+alias DummyProductApi.Repo
+
+query = from p in Product, select: p, preload: [:owner_user]
+query |> Repo.all()
+```
+This will issue 2 queries:
+1. retrieve products
+2. retrieve users via user id
+
+Inversely, from users and their products
+```
+import Ecto.Query, only: [from: 2]
+alias DummyProductApi.Product
+alias DummyProductApi.User
+alias DummyProductApi.Repo
+
+query = from u in User, select: u, preload: [:products]
+query |> Repo.all()
+```
+
+To retrieve all data with a single query
+```
+import Ecto.Query, only: [from: 2]
+alias DummyProductApi.Product
+alias DummyProductApi.User
+alias DummyProductApi.Repo
+
+query = from p in Product,
+ inner_join: u in assoc(p, :owner_user),
+ preload: [owner_user: u]
+query |> Repo.all()
+```
+
 
 ## up-to-date iex commands
 Leaving previous commands in their versions because they make sense and provide context on the code at the point in time they were created, but they evolve with the changes. So this section just has up-to-date commands
