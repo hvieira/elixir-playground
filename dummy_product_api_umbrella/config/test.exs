@@ -23,8 +23,5 @@ config :dummy_product_api_web, DummyProductApiWeb.Endpoint,
 # Print only warnings and errors during test
 config :logger, level: :warn
 
-# In test we don't send emails.
-config :dummy_product_api, DummyProductApi.Mailer, adapter: Swoosh.Adapters.Test
-
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime

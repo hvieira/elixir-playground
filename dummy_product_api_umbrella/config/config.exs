@@ -13,15 +13,6 @@ import Config
 config :dummy_product_api,
   ecto_repos: [DummyProductApi.Repo]
 
-# Configures the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :dummy_product_api, DummyProductApi.Mailer, adapter: Swoosh.Adapters.Local
-
 config :dummy_product_api_web,
   ecto_repos: [DummyProductApi.Repo],
   generators: [context_app: :dummy_product_api]
