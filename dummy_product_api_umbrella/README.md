@@ -11,6 +11,7 @@ See `config.exs` for migration defaults and docs for such options in [here](http
 config :dummy_product_api, DummyProductApi.Repo,
   migration_primary_key: [name: :id, type: :binary_id]
 ```
+An update after the fact: `mix phx.new` supports a `--binary-id` option
 
 ### Building the initial Product model
 
@@ -119,7 +120,12 @@ query |> Repo.all()
 ```
 
 ## Building an API
+On a fair note, an API does not need frontend resources, so these types of 
+projects can be bootstrapped with the following options from `mix phx.new` 
+`--no-assets --no-html --no-gettext --no-dashboard --no-live --no-mailer`
+
 *Coming soon*
+
 
 ## TODO
 - Build an API for users (with tests)
@@ -128,6 +134,8 @@ query |> Repo.all()
 - Get telemetry/metrics using a prometheus exporter
   - https://github.com/deadtrickster/prometheus-phoenix
   - (a bit more low level) https://github.com/deadtrickster/prometheus.ex
+- (?) Authentication with JWT 
+- (?) Dumb down "backoffice" frontend to display users and products
 
 
 
@@ -143,7 +151,7 @@ new_product = inserted_user |> Ecto.build_assoc(:products, %{name: "bananas", de
 new_product |> DummyProductApi.Repo.insert()
 ```
 
-### TO REMOVE ONCE THINGS ARE PROPER
+### TO REMOVE :point_down: ONCE THINGS ARE PROPER
 
 To start your Phoenix server:
 
