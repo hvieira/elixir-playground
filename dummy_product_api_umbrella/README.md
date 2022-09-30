@@ -1,16 +1,18 @@
 # DummyProductApi.Umbrella
 
-## Migrations
+## Database and Ecto schema
+
+### Migrations
 See `config.exs` for migration defaults and docs for such options in [here](https://hexdocs.pm/ecto_sql/Ecto.Migration.html#timestamps/1)
 
 
-### Use UUIDs as default for primary keys
+#### Use UUIDs as default for primary keys
 ```
 config :dummy_product_api, DummyProductApi.Repo,
   migration_primary_key: [name: :id, type: :binary_id]
 ```
 
-## Building the initial Product model
+### Building the initial Product model
 
 See `base_model.ex` for:
 - UUID usage for identifiers
@@ -66,7 +68,7 @@ new_product = inserted_user |> Ecto.build_assoc(:products, %{name: "bananas", de
 new_product |> DummyProductApi.Repo.insert()
 ```
 
-## Renaming columns + more on migrations
+### Renaming columns + more on migrations
 if the migration is something simple - like adding a column, then we can just use `change`, but for things even slightly more complex
 than that, `up` and `down` provides more control on what it is we want to do.
 
@@ -77,7 +79,7 @@ commands, which will allow a rename of a constraint.
 
 Naming constraints explicitly can also be a good thing to do, even if it matches the default. This way even if the library changes, or the tool to make migrations changes, the names of the constraints are known and explicit.
 
-## Querying
+### Querying
 Preloading associations will work as such
 ```
 import Ecto.Query, only: [from: 2]
@@ -115,6 +117,18 @@ query = from p in Product,
  preload: [owner_user: u]
 query |> Repo.all()
 ```
+
+## Building an API
+*Coming soon*
+
+## TODO
+- Build an API for users (with tests)
+- Build an API for products (with tests)
+- Run as docker container
+- Get telemetry/metrics using a prometheus exporter
+  - https://github.com/deadtrickster/prometheus-phoenix
+  - (a bit more low level) https://github.com/deadtrickster/prometheus.ex
+
 
 
 ## up-to-date iex commands
