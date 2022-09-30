@@ -22,9 +22,6 @@ config :dummy_product_api,
 # at the `config/runtime.exs`.
 config :dummy_product_api, DummyProductApi.Mailer, adapter: Swoosh.Adapters.Local
 
-# Swoosh API client is needed for adapters other than SMTP.
-config :swoosh, :api_client, false
-
 config :dummy_product_api_web,
   ecto_repos: [DummyProductApi.Repo],
   generators: [context_app: :dummy_product_api]
