@@ -20,10 +20,11 @@ defmodule DummyProductApiWeb.Router do
     get "/", PageController, :index
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", DummyProductApiWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", DummyProductApiWeb do
+    pipe_through :api
+
+    resources "/users", UserController, only: [:create, :show, :update, :delete]
+  end
 
   # Enables LiveDashboard only for development
   #
@@ -41,5 +42,4 @@ defmodule DummyProductApiWeb.Router do
       live_dashboard "/dashboard", metrics: DummyProductApiWeb.Telemetry
     end
   end
-
 end
