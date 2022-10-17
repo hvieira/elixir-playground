@@ -19,4 +19,10 @@ defmodule DummyProductApiWeb.ErrorView do
       message: "Bad request"
     }
   end
+
+  def render("500.json", _assigns) do
+    %{
+      message: "Internal server error"
+    }
+  end
 end
