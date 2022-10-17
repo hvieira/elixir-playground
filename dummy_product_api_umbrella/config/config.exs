@@ -27,6 +27,9 @@ config :dummy_product_api_web, DummyProductApiWeb.Endpoint,
 config :dummy_product_api, DummyProductApi.Repo,
   migration_primary_key: [name: :id, type: :binary_id]
 
+config :dummy_product_api,
+  user_store: DummyProductApi.UserDatabaseStore
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.14.29",

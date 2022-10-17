@@ -6,12 +6,14 @@ defmodule DummyProductApiWeb.UserController do
 
   action_fallback DummyProductApiWeb.ErrorController
 
+  @user_store Application.get_env(:dummy_product_api, :user_store)
+
   def create(conn, %{"name" => _} = params) do
-    {:ok, user} = UserStore.create_user(params)
+    {:ok, user} = @user_store.create_user(params)
     render(conn, "create.json", user: user)
   end
 
-  def create(conn, params) do
+  def create(conn, _params) do
     {:error, :bad_request}
   end
 end

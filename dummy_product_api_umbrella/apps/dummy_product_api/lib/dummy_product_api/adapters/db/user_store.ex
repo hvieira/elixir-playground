@@ -1,8 +1,12 @@
 defmodule DummyProductApi.UserStore do
+  @callback create_user(user :: term) :: {:ok, user :: term} | {:error, reason :: term}
+end
+
+defmodule DummyProductApi.UserDatabaseStore do
+  @behaviour DummyProductApi.UserStore
+
   alias DummyProductApi.Repo
   alias DummyProductApi.User
-
-  # TODO define behaviour for this that can be mocked
 
   def create_user(user_params) do
     changeset =
