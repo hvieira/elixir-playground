@@ -1,6 +1,8 @@
 defmodule DummyProductApi.MixProject do
   use Mix.Project
 
+  @test_envs [:test, :integration_test]
+
   def project do
     [
       app: :dummy_product_api,
@@ -13,7 +15,8 @@ defmodule DummyProductApi.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_paths: test_paths(Mix.env())
     ]
   end
 
@@ -28,7 +31,7 @@ defmodule DummyProductApi.MixProject do
   end
 
   # Specifies which paths to compile per environment.
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(env) when env in @test_envs, do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   # Specifies your project dependencies.
@@ -39,7 +42,8 @@ defmodule DummyProductApi.MixProject do
       {:phoenix_pubsub, "~> 2.0"},
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
-      {:jason, "~> 1.2"}
+      {:jason, "~> 1.2"},
+      {:mox, "~> 1.0.2", only: @test_envs}
     ]
   end
 
@@ -54,4 +58,8 @@ defmodule DummyProductApi.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
   end
+
+  defp test_paths(:integration_test), do: ["test/integration"]
+  defp test_paths(_), do: ["test/unit"]
+
 end

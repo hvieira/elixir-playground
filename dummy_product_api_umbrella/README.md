@@ -151,6 +151,20 @@ new_product = inserted_user |> Ecto.build_assoc(:products, %{name: "bananas", de
 new_product |> DummyProductApi.Repo.insert()
 ```
 
+## Multiple tests environments/levels
+Based on this guide https://spin.atomicobject.com/2018/10/22/elixir-test-multiple-environments/
+
+The main aspect to record is that I tried to use `:unit_test` (and not `:test`) alongside `:integration_test`,
+which didn't work quite well. I wanted to use `mix test` to run all tests. 
+However `mix test` runs with `test` environment so everything got confused and
+tests would error out with dependent applications not being started. However, setting the appropriate env
+with `MIX_ENV=<unit|integration_test>` worked fine.
+
+It might be possible to set up a task/alias to run all tests for all environments. In this
+way it could be possible to run all tests together, but at the same time I wonder if `mix test` 
+would become a "standard" command that is unused and when used it would break - does not seem great to me.
+Likely there's some way to address this.
+
 ### TO REMOVE :point_down: ONCE THINGS ARE PROPER
 
 To start your Phoenix server:
