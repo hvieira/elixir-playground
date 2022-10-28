@@ -1,8 +1,6 @@
 defmodule DummyProductApiWeb.MixProject do
   use Mix.Project
 
-  @test_envs [:test, :integration_test]
-
   def project do
     [
       app: :dummy_product_api_web,
@@ -16,8 +14,7 @@ defmodule DummyProductApiWeb.MixProject do
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps(),
-      test_paths: test_paths(Mix.env())
+      deps: deps()
     ]
   end
 
@@ -32,7 +29,7 @@ defmodule DummyProductApiWeb.MixProject do
   end
 
   # Specifies which paths to compile per environment.
-  defp elixirc_paths(env) when env in @test_envs, do: ["lib", "test/support"]
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   # Specifies your project dependencies.
@@ -54,7 +51,7 @@ defmodule DummyProductApiWeb.MixProject do
       {:dummy_product_api, in_umbrella: true},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:mox, "~> 1.0.2", only: @test_envs}
+      {:mox, "~> 1.0.2", only: :test}
     ]
   end
 
@@ -68,7 +65,4 @@ defmodule DummyProductApiWeb.MixProject do
       "assets.deploy": ["esbuild default --minify", "phx.digest"]
     ]
   end
-
-  defp test_paths(:integration_test), do: ["test/integration"]
-  defp test_paths(_), do: ["test/unit"]
 end
