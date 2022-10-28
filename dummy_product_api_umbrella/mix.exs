@@ -1,6 +1,8 @@
 defmodule DummyProductApi.Umbrella.MixProject do
   use Mix.Project
 
+  @test_envs [:test, :integration_test]
+
   def project do
     [
       apps_path: "apps",
@@ -39,7 +41,14 @@ defmodule DummyProductApi.Umbrella.MixProject do
   defp aliases do
     [
       # run `mix setup` in all child apps
-      setup: ["cmd mix setup"]
+      setup: ["cmd mix setup"],
+      testall: &run_all_tests/1
     ]
+  end
+
+  defp run_all_tests(_) do
+    for env <- @test_envs do
+      Mix.Task.run("cmd", ["MIX_ENV=#{env} mix test"])
+    end
   end
 end

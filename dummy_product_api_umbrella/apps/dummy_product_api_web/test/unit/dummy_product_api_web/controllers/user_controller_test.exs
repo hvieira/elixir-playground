@@ -6,7 +6,7 @@ defmodule DummyProductApiWeb.UserControllerTest do
 
   test "create users - error when saving user", %{conn: conn} do
     DummyProductApi.UserStoreMock
-    |> expect(:create_user, fn (_user_params) -> {:error, "oh noes"} end)
+    |> expect(:create_user, fn _user_params -> {:error, "oh noes"} end)
 
     response = post(conn, "/api/users", %{name: "Senor John"})
 

@@ -61,5 +61,4 @@ defmodule DummyProductApi.MixProject do
 
   defp test_paths(:integration_test), do: ["test/integration"]
   defp test_paths(_), do: ["test/unit"]
-
 end
