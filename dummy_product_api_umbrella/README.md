@@ -42,7 +42,7 @@ and the `has_many` needs to define the foreign_key if it does not match the defa
 
 > defaults to the underscored name of the current schema suffixed by _id.
 
-In essence, because I'm using foreign key (in the DB) that is not a "standard" - `user_id` - but actually `owner_id` then this customization is necessary. 
+In essence, because I'm using foreign key (in the DB) that is not a "standard" - `user_id` - but actually `owner_id` then this customization is necessary.
 
 ```
 schema "products" do
@@ -57,7 +57,7 @@ schema "products" do
 ```
 
 When executing the code below in a iex session, see how Product has both `owner` and `owner_id`. When we build the association,
-the `owner_id` is populated. 
+the `owner_id` is populated.
 
 ***TODO: when is owner used/populated? does it work if we set the owner and not the owner_id?***
 ```
@@ -120,8 +120,8 @@ query |> Repo.all()
 ```
 
 ## Building an API
-On a fair note, an API does not need frontend resources, so these types of 
-projects can be bootstrapped with the following options from `mix phx.new` 
+On a fair note, an API does not need frontend resources, so these types of
+projects can be bootstrapped with the following options from `mix phx.new`
 `--no-assets --no-html --no-gettext --no-dashboard --no-live --no-mailer`
 
 *Coming soon*
@@ -134,7 +134,7 @@ projects can be bootstrapped with the following options from `mix phx.new`
 - Get telemetry/metrics using a prometheus exporter
   - https://github.com/deadtrickster/prometheus-phoenix
   - (a bit more low level) https://github.com/deadtrickster/prometheus.ex
-- (?) Authentication with JWT 
+- (?) Authentication with JWT
 - (?) Dumb down "backoffice" frontend to display users and products
 
 
@@ -151,13 +151,49 @@ new_product = inserted_user |> Ecto.build_assoc(:products, %{name: "bananas", de
 new_product |> DummyProductApi.Repo.insert()
 ```
 
+## Multiple tests environments/levels
+Based on this guide https://spin.atomicobject.com/2018/10/22/elixir-test-multiple-environments/
+
+The main aspect to record is that I tried to use `:unit_test` (and not `:test`) alongside `:integration_test`,
+which didn't work quite well. I wanted to use `mix test` to run all tests.
+However `mix test` runs with `test` environment so everything got confused and
+tests would error out with dependent applications not being started. However, setting the appropriate env
+with `MIX_ENV=<unit|integration_test>` worked fine.
+
+It might be possible to set up a task/alias to run all tests for all environments. In this
+way it could be possible to run all tests together, but at the same time I wonder if `mix test`
+would become a "standard" command that is unused and when used it would break - does not seem great to me.
+Likely there's some way to address this.
+
+### A different (perhaps better) approach using tags/filters
+The multiple env approach was used and reverted. Go back to revision `67f9c6e2c94374e5b2513df82c26ec9959395946`
+to see the state of such setup.
+
+Another identified alternative is to use ExUnit tags and filters to run groups
+of tests. Here's my perspective on this approach.
+- while this still requires the diff tests groups to have the same setup (db, http clients, ...)
+we can run tests in a separate manner and with the simpler original setup.
+- setting up the stubs/mocks require a bit more work. Instead of defining them in
+`test_helper.exs`, which is shared by all test types (meaning it would mess up integration tests), 
+a common setup can be used for unit tests, where the same "replacement" 
+is done. 
+While this is not optimal, it's a single line of code per test module 
+and allows chaining of `setup` steps - see [docs](https://hexdocs.pm/ex_unit/1.12/ExUnit.Callbacks.html)
+
+Some further ideas from the internet to explore
+- https://www.livinginthepast.org/blog/exunit-tags-test-setup/
+- https://elixirforum.com/t/separate-mix-commands-for-unit-and-integration-tests/32370
+
+
+
+
 ### TO REMOVE :point_down: ONCE THINGS ARE PROPER
 
 To start your Phoenix server:
 
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.setup`
-  * Start Phoenix endpoint with `mix phx.server`
+* Install dependencies with `mix deps.get`
+* Create and migrate your database with `mix ecto.setup`
+* Start Phoenix endpoint with `mix phx.server`
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
@@ -165,8 +201,9 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 
 ## Learn more
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+* Official website: https://www.phoenixframework.org/
+* Guides: https://hexdocs.pm/phoenix/overview.html
+* Docs: https://hexdocs.pm/phoenix
+* Forum: https://elixirforum.com/c/phoenix-forum
+* Source: https://github.com/phoenixframework/phoenix
+

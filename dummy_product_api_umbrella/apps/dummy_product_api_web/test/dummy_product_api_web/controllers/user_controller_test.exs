@@ -1,43 +1,21 @@
 defmodule DummyProductApiWeb.UserControllerTest do
   use DummyProductApiWeb.ConnCase, async: true
   import Mox
+  import DummyProductApiWeb.MocksHelper
 
-  setup :verify_on_exit!
+  setup [:setup_mocks, :verify_on_exit!]
 
-  @uuid_regex ~r/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
+  test "create users - error when saving user", %{conn: conn} do
+    Application.put_env(:dummy_product_api, :user_store, DummyProductApi.UserStoreMock)
 
-  # integration tests
-    test "create users", %{conn: conn} do
-      conn = post(conn, "/api/users", %{name: "Senor John"})
 
-      %{
-        "data" => %{
-          "id" => user_id,
-          "name" => "Senor John"
-        }
-      } = json_response(conn, 200)
+    DummyProductApi.UserStoreMock
+    |> expect(:create_user, fn (_user_params) -> {:error, "oh noes"} end)
 
-      # check id is a uuid
-      assert String.match?(user_id, @uuid_regex)
-    end
+    response = post(conn, "/api/users", %{name: "Senor John"})
 
-    test "create users - bad request - no name", %{conn: conn} do
-      conn = post(conn, "/api/users", %{username: "Senor John"})
-
-      assert json_response(conn, 400) == %{
-               "message" => "Bad request"
-             }
-    end
-
-#  # unit test
-#  test "create users - error when saving user", %{conn: conn} do
-#    DummyProductApi.UserStoreMock
-#    |> expect(:create_user, fn (_user_params) -> {:error, "oh noes"} end)
-#
-#    response = post(conn, "/api/users", %{name: "Senor John"})
-#
-#    assert json_response(response, 500) == %{
-#             "message" => "Internal server error"
-#           }
-#  end
+    assert json_response(response, 500) == %{
+             "message" => "Internal server error"
+           }
+  end
 end

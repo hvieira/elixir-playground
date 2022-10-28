@@ -7,7 +7,8 @@ defmodule DummyProductApi.Umbrella.MixProject do
       version: "0.1.0",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      preferred_cli_env: [testall: :test]
     ]
   end
 
@@ -39,7 +40,14 @@ defmodule DummyProductApi.Umbrella.MixProject do
   defp aliases do
     [
       # run `mix setup` in all child apps
-      setup: ["cmd mix setup"]
+      setup: ["cmd mix setup"],
+      testall: [
+        "test",
+        # TODO while this works to re-enable the test task, it does not find any tests for some reason - maybe ask in forums
+        ~s|run -e 'Mix.Task.reenable(:test)'|,
+        "test --only integration",
+      ]
     ]
   end
+
 end
