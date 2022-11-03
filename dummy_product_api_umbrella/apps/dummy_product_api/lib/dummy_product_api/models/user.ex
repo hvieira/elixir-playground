@@ -5,6 +5,8 @@ defmodule DummyProductApi.User do
 
   schema "users" do
     field :name, :string
+    field :username, :string
+    field :password, :string
     has_many :products, DummyProductApi.Product, foreign_key: :owner_user_id
 
     timestamps()
@@ -13,7 +15,7 @@ defmodule DummyProductApi.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
+    |> cast(attrs, [:name, :username, :password])
+    |> validate_required([:name, :username, :password])
   end
 end
