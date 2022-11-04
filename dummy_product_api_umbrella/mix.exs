@@ -11,7 +11,7 @@ defmodule DummyProductApi.Umbrella.MixProject do
       preferred_cli_env: [
         ut: :test,
         it: :test,
-        testall: :test,
+        testall: :test
       ]
     ]
   end
@@ -51,9 +51,8 @@ defmodule DummyProductApi.Umbrella.MixProject do
         "ut",
         # TODO while this works to re-enable the test task, it does not find any tests for some reason - maybe ask in forums
         ~s|run -e 'Mix.Task.reenable(:test)'|,
-        "it",
+        "it"
       ]
     ]
   end
-
 end

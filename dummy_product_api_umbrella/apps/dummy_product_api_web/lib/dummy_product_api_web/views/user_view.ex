@@ -5,7 +5,8 @@ defmodule DummyProductApiWeb.UserView do
     %{
       data: %{
         id: user.id,
-        name: user.name
+        name: user.name,
+        username: user.username
       }
     }
   end
