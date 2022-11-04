@@ -12,9 +12,8 @@ defmodule DummyProductApiWeb.UserController do
       {:error, :invalid_user_attributes} ->
         {:error, :bad_request}
 
-      err ->
+      _err ->
         {:error, :internal_server_error}
     end
   end
-
 end
