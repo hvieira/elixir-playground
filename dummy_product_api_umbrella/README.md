@@ -128,6 +128,10 @@ projects can be bootstrapped with the following options from `mix phx.new`
 
 
 ## TODO
+- Build authenticated endpoints with JWT as bearer tokens
+  - issuing of JWT tokens as access tokens. Could also do ID tokens but necessary for this
+  - validating JWT tokens signature
+  - protect endpoints with JWT when authN/Z is required
 - Build an API for users (with tests)
 - Build an API for products (with tests)
 - Run as docker container
