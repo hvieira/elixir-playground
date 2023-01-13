@@ -3,14 +3,16 @@ defmodule DummyProductApiWeb.Auth.JWTTest do
 
   alias DummyProductApiWeb.Auth.JWT
 
-  @dummy_jwt "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+  test "create valid tokens" do
+    {:ok, token_str, claims} = JWT.generate_and_sign()
 
-
-#  test "decoding a JWT" do
-#    jwt = JWT.verify(@dummy_jwt, "")
-#  end
-
-  test "create token" do
-    JWT.generate_and_sign()
+    assert token_str !=nil
+    assert claims["jti"] != nil
+    assert claims["aud"] == Application.get_env(:dummy_product_api_web, :audience)
+    assert claims["iss"] == Application.get_env(:dummy_product_api_web, :audience)
+    # not before equals expiration + ttl
+    assert claims["nbf"] + (60 * 60) == claims["exp"]
+    assert_in_delta claims["iat"], :os.system_time(:seconds), 10
   end
+
 end

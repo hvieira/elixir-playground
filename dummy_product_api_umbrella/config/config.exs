@@ -30,6 +30,10 @@ config :dummy_product_api, DummyProductApi.Repo,
 config :dummy_product_api,
   user_store: DummyProductApi.UserDatabaseStore
 
+config :dummy_product_api_web,
+   # The audience of a token is the intended recipient of the token. The audience value is a string -- typically, the base address of the resource being accessed, such as https://contoso.com.
+   audience: "dummy_product.com"
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.14.29",
@@ -47,11 +51,6 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
-
-jwt_private_key_path = "./keys/dev_auth.key"
-jwt_private_key_contents = File.read!(jwt_private_key_path)
-
-config :joken, default_signer: jwt_private_key_contents
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

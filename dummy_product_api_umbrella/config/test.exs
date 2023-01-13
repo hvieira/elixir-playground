@@ -26,4 +26,7 @@ config :logger, level: :warn
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 
-#config :joken, default_signer: "secret"
+jwt_private_key_path = "./keys/dev_auth.key"
+jwt_private_key_contents = File.read!(jwt_private_key_path)
+
+config :joken, default_signer: jwt_private_key_contents
