@@ -124,7 +124,49 @@ On a fair note, an API does not need frontend resources, so these types of
 projects can be bootstrapped with the following options from `mix phx.new`
 `--no-assets --no-html --no-gettext --no-dashboard --no-live --no-mailer`
 
-*Coming soon*
+### Authentication with JWT
+[Joken](https://hexdocs.pm/joken/readme.html) 
+which pulls JOSE as a dependency to work with JWTs.
+
+A module can be configured with `use Joken.Config` to implement
+the necessary functions and wiring to configuration (`config.exs` and relative env configuration).
+
+The configuration itself was a bit difficult to understand, but ultimately a basic
+example with a default signer looks like:
+```
+config :joken,
+  default_signer:
+    [
+      signer_alg: "RS256", # or whatever other algorithm
+      key_pem: <private key contents>,
+      jose_extra_headers: %{"kid" => "<key ID>"}
+    ]
+```
+A default signer is good IF we don't rotate (private) keys, which is not ideal for security. To rotate keys we need to specify a 
+key ID `kid` on the signer which will include that header in generated JWTs. 
+A `kid` could be the sha1 (`openssl sha1 <path_to_key>`) of the private key,
+but even better of an associated public key which the server should serve on a well known URL. In open ID protocol a 
+[provider configuration](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig) 
+is established in a well known URI. This URI response contains a `jwks_uri` which is where the keys should be served.
+
+#### Key rotation
+To rotate the keys, multiple signers must be supported (at least the previous and a new signer). 
+The JWTs must be validated according to their `kid`. Once the previous signer is removed signing new tokens, some time
+must be allowed to pass (at least the TTL of the tokens) so that we can safely remove the old signer 
+
+*TODOs*: 
+- How will the usage of a specific signer (instead of default) alter the code?
+- How to use the `kid` to find the appropriate signer?
+
+#### Retrieve a public key from a RSA key
+openssl rsa -in <private_key_path> -pubout > <public_key_path>
+
+#### SHA1 of a file
+openssl sha1 <filepath>
+
+
+
+### *More Coming soon*
 
 
 ## TODO

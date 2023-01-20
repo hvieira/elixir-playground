@@ -26,7 +26,24 @@ config :logger, level: :warn
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 
-jwt_private_key_path = "./keys/dev_auth.key"
+
+# JOKEN configuration
+# https://github.com/joken-elixir/joken/issues/294
+
+# we can extract a pub key from a pem with
+# openssl rsa -in keys/dev_auth_2048.pem -pubout > keys/dev_auth_2048.pub
+
+# kid can be the sha1 of the key
+# openssl sha1 keys/dev_auth_2048.pem
+# SHA1(keys/dev_auth_2048.pem)= 358940cccdde245c1adc3fc1ca0cef0e11e1259b
+
+jwt_private_key_path = "./keys/dev_auth_2048.pem"
 jwt_private_key_contents = File.read!(jwt_private_key_path)
 
-config :joken, default_signer: jwt_private_key_contents
+config :joken,
+  default_signer:
+    [
+      signer_alg: "RS256",
+      key_pem: jwt_private_key_contents,
+      jose_extra_headers: %{"kid" => "27990a52048ad51645b1b55988bec56e0a6a96ae"}
+    ]
