@@ -31,8 +31,8 @@ config :dummy_product_api,
   user_store: DummyProductApi.UserDatabaseStore
 
 config :dummy_product_api_web,
-   # The audience of a token is the intended recipient of the token. The audience value is a string -- typically, the base address of the resource being accessed, such as https://contoso.com.
-   audience: "dummy_product.com"
+  # The audience of a token is the intended recipient of the token. The audience value is a string -- typically, the base address of the resource being accessed, such as https://contoso.com.
+  audience: "dummy_product.com"
 
 # Configure esbuild (the version is required)
 config :esbuild,
