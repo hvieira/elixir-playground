@@ -158,8 +158,11 @@ must be allowed to pass (at least the TTL of the tokens) so that we can safely r
 - How will the usage of a specific signer (instead of default) alter the code?
 - How to use the `kid` to find the appropriate signer?
 
+#### Create a RSA private key
+`openssl genrsa -out <private_key_path> 2048`
+
 #### Retrieve a public key from a RSA key
-openssl rsa -in <private_key_path> -pubout > <public_key_path>
+`openssl rsa -in <private_key_path> -pubout > <public_key_path>`
 
 #### SHA1 of a file
 openssl sha1 <filepath>
