@@ -37,13 +37,26 @@ config :phoenix, :plug_init_mode, :runtime
 # openssl sha1 keys/dev_auth_2048.pem
 # SHA1(keys/dev_auth_2048.pem)= 358940cccdde245c1adc3fc1ca0cef0e11e1259b
 
-jwt_private_key_path = "./keys/dev_auth_2048.pem"
-jwt_private_key_contents = File.read!(jwt_private_key_path)
+new_private_key_contents = File.read!("./keys/test_new_2048.pem")
+
+old_private_key_contents = File.read!("./keys/test_old_2048.pem")
 
 config :joken,
-  default_signer:
-    [
-      signer_alg: "RS256",
-      key_pem: jwt_private_key_contents,
-      jose_extra_headers: %{"kid" => "27990a52048ad51645b1b55988bec56e0a6a96ae"}
-    ]
+  new_signer: [
+    signer_alg: "RS256",
+    key_pem: new_private_key_contents,
+    # TODO this could be computed here instead of hardcoded - see if it is possible
+    jose_extra_headers: %{"kid" => "27990a52048ad51645b1b55988bec56e0a6a96ae"}
+  ],
+  old_signer: [
+    signer_alg: "RS256",
+    key_pem: old_private_key_contents,
+    # TODO this could be computed here instead of hardcoded - see if it is possible
+    jose_extra_headers: %{"kid" => "628492d6e921440fa8f979d7b9d04beb4ac786a7"}
+  ]
+#  default_signer:
+#    [
+#      signer_alg: "RS256",
+#      key_pem: new_private_key_contents,
+#      jose_extra_headers: %{"kid" => "27990a52048ad51645b1b55988bec56e0a6a96ae"}
+#    ]
