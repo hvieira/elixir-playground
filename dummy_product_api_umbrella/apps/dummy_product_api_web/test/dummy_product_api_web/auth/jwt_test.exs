@@ -6,7 +6,6 @@ defmodule DummyProductApiWeb.Auth.JWTTest do
   @default_test_signer :new_signer
   @bad_audience "another_site.org"
 
-
   test "create valid tokens" do
     claims = %{}
     {:ok, token_str, claims} = JWT.generate_and_sign(claims, @default_test_signer)

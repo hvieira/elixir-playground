@@ -26,7 +26,6 @@ config :logger, level: :warn
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 
-
 # JOKEN configuration
 # https://github.com/joken-elixir/joken/issues/294
 
@@ -54,6 +53,7 @@ config :joken,
     # TODO this could be computed here instead of hardcoded - see if it is possible
     jose_extra_headers: %{"kid" => "628492d6e921440fa8f979d7b9d04beb4ac786a7"}
   ]
+
 #  default_signer:
 #    [
 #      signer_alg: "RS256",

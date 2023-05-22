@@ -23,6 +23,8 @@ defmodule DummyProductApiWeb.Router do
   scope "/api", DummyProductApiWeb do
     pipe_through :api
 
+    post "/login", LoginController, :login
+
     resources "/users", UserController, only: [:create, :show, :update, :delete]
   end
 
