@@ -45,8 +45,8 @@ defmodule DummyProductApi.Umbrella.MixProject do
     [
       # run `mix setup` in all child apps
       setup: ["cmd mix setup"],
-      ut: "test",
-      it: "test --only integration",
+      ut: "test --trace --slowest 5",
+      it: "test --only integration --trace --slowest 5",
       testall: [
         "ut",
         # TODO while this works to re-enable the test task, it does not find any tests for some reason - maybe ask in forums
