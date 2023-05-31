@@ -14,4 +14,5 @@ defmodule DummyProductApiWeb.ErrorController do
     |> put_view(DummyProductApiWeb.ErrorView)
     |> render("500.json")
   end
+
 end

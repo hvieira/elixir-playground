@@ -26,4 +26,11 @@ defmodule DummyProductApi.UserDatabaseStore do
       {:ok, user}
     end
   end
+
+  def get_user_by_id(user_id) do
+    with user <-
+           Repo.get(User, user_id) do
+      {:ok, user}
+    end
+  end
 end

@@ -25,4 +25,13 @@ defmodule DummyProductApi.UserRegistry do
         err
     end
   end
+
+  def get_user_by_id(user_id) do
+    with {:ok, user} <- user_store().get_user_by_id(user_id) do
+      {:ok, user}
+    else
+      err ->
+        err
+    end
+  end
 end

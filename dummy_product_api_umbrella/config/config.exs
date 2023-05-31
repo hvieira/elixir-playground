@@ -28,7 +28,8 @@ config :dummy_product_api, DummyProductApi.Repo,
   migration_primary_key: [name: :id, type: :binary_id]
 
 config :dummy_product_api,
-  user_store: DummyProductApi.UserDatabaseStore
+  user_store: DummyProductApi.UserDatabaseStore,
+  product_store: DummyProductApi.ProductDatabaseStore
 
 config :dummy_product_api_web,
   # The audience of a token is the intended recipient of the token. The audience value is a string -- typically, the base address of the resource being accessed, such as https://contoso.com.
