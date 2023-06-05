@@ -234,7 +234,15 @@ Some further ideas from the internet to explore
 - https://elixirforum.com/t/separate-mix-commands-for-unit-and-integration-tests/32370
 
 
+## Performance considerations
 
+### Ecto
+To see the queries issued by ecto, we can set logging to debug in the appropriate config file - likely 
+`dev.exs` and/or `test.exs`. In case of tests the output gets quite verbose
+
+```
+config :logger, level: :debug
+```
 
 ### TO REMOVE :point_down: ONCE THINGS ARE PROPER
 
