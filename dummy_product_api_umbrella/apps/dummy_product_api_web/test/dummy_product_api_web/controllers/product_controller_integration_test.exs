@@ -61,4 +61,6 @@ defmodule DummyProductApiWeb.ProductControllerIntegrationTest do
       },
       product)
   end
+
+  # TODO test user ownership - can only update and delete owned products
 end

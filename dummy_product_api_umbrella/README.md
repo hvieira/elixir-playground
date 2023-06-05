@@ -154,9 +154,54 @@ To rotate the keys, multiple signers must be supported (at least the previous an
 The JWTs must be validated according to their `kid`. Once the previous signer is removed signing new tokens, some time
 must be allowed to pass (at least the TTL of the tokens) so that we can safely remove the old signer 
 
-*TODOs*: 
-- How will the usage of a specific signer (instead of default) alter the code?
-- How to use the `kid` to find the appropriate signer?
+We can define specific signers in the configuration, but no default signer. Maybe it supports both approaches - default and other signers.
+With a default signer, we can generate and verify without passing in the atom identifying the signer to these functions, but we can also 
+pass in the explicit signer.
+
+```elixir
+# default signer
+JWT.generate_and_sign(claims)
+# explicit signer
+JWT.generate_and_sign(claims, :new_signer)
+```
+
+As long as tokens have a `kid` (which they should) then we can match the kid to the signer and apply it in a `before_verify` Joken hook, which would look like:
+
+```elixir
+  @impl true
+  def before_verify(_hook_options, {token, _signer}) do
+    new_signer = Joken.Signer.parse_config(:new_signer)
+    new_signer_kid = Joken.Signer.parse_config(:new_signer).jws.fields["kid"]
+
+    old_signer = Joken.Signer.parse_config(:old_signer)
+    old_signer_kid = Joken.Signer.parse_config(:old_signer).jws.fields["kid"]
+
+    with {:ok, headers} <- Joken.peek_header(token),
+         kid <- Map.get(headers, "kid") do
+      case kid do
+        ^new_signer_kid ->
+          {:cont, {token, new_signer}}
+
+        ^old_signer_kid ->
+          {:cont, {token, old_signer}}
+
+        # other key ids are not valid
+        nil ->
+          Logger.warning("No key id (kid) header present in token")
+          @hook_signature_error
+        kid ->
+          Logger.warning("Key for JWT token not recognized #{kid}")
+          @hook_signature_error
+      end
+    else
+      _ -> @hook_signature_error
+    end
+  end
+```
+
+**NOTE: we can access the config file signers via `parse_config` function**
+
+With this setup it would be possible to rotate keys by always maintaining an old and new key. When rotating keys, the "new key" becomes the old_key/old_signer and a newly created key is assigned to be the new_key/new_signer.
 
 #### Create a RSA private key
 `openssl genrsa -out <private_key_path> 2048`

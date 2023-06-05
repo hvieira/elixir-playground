@@ -37,23 +37,24 @@ config :phoenix, :plug_init_mode, :runtime
 # SHA1(keys/dev_auth_2048.pem)= 358940cccdde245c1adc3fc1ca0cef0e11e1259b
 
 new_private_key_contents = File.read!("./keys/test_new_2048.pem")
+new_public_key_contents = File.read!("./keys/test_new_2048.pub")
+new_key_id = :crypto.hash(:sha, new_public_key_contents) |> Base.encode16()
 
 old_private_key_contents = File.read!("./keys/test_old_2048.pem")
+old_public_key_contents = File.read!("./keys/test_old_2048.pub")
+old_key_id = :crypto.hash(:sha, old_public_key_contents) |> Base.encode16()
 
 config :joken,
   new_signer: [
     signer_alg: "RS256",
     key_pem: new_private_key_contents,
-    # TODO this could be computed here instead of hardcoded - see if it is possible
-    jose_extra_headers: %{"kid" => "27990a52048ad51645b1b55988bec56e0a6a96ae"}
+    jose_extra_headers: %{"kid" => new_key_id}
   ],
   old_signer: [
     signer_alg: "RS256",
     key_pem: old_private_key_contents,
-    # TODO this could be computed here instead of hardcoded - see if it is possible
-    jose_extra_headers: %{"kid" => "628492d6e921440fa8f979d7b9d04beb4ac786a7"}
+    jose_extra_headers: %{"kid" => old_key_id}
   ]
-
 #  default_signer:
 #    [
 #      signer_alg: "RS256",

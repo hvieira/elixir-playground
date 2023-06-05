@@ -62,4 +62,18 @@ defmodule DummyProductApiWeb.Auth.JWTTest do
     assert result == :error
     assert error_details == [message: "Invalid token", claim: "nbf", claim_val: nbf_override]
   end
+
+  test "verify token through valid kid(s)" do
+    {:ok, token_str_signed_with_new_key, _} = JWT.generate_and_sign(%{}, :new_signer)
+    {:ok, token_str_signed_with_old_key, _} = JWT.generate_and_sign(%{}, :old_signer)
+
+    {:ok, _claims} = JWT.verify_and_validate(token_str_signed_with_new_key)
+    {:ok, _claims} = JWT.verify_and_validate(token_str_signed_with_old_key)
+  end
+
+  test "verify tokens that have not been signed with valid signers" do
+    {:ok, token_str, _} = JWT.generate_and_sign(%{}, Joken.Signer.create("HS256", "s3cret"))
+
+    assert JWT.verify_and_validate(token_str) == {:error, :signature_error}
+  end
 end
