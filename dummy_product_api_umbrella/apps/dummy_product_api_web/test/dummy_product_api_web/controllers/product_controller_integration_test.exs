@@ -262,4 +262,40 @@ defmodule DummyProductApiWeb.ProductControllerIntegrationTest do
       "message" => "Not Found"
     } = json_response(response, 404)
   end
+
+  test "updating a product with non existing user returns a 401", %{conn: conn} do
+    {:ok, user} =
+      Repo.insert(
+        User.changeset(%User{}, %{
+          name: "Test",
+          username: "test",
+          password: "test"
+        })
+      )
+      {:ok, product} =
+        Ecto.build_assoc(user, :products, %{
+          name: "product by #{user.id}",
+          description: "amazing product by #{user.id}. It's really great!",
+          value: 100
+        })
+        |> Repo.insert()
+
+      # very small change of UUID clash here
+    {:ok, token, _claims} =
+      JWT.generate_and_sign(
+        %{sub: UUID.uuid4()},
+        :new_signer
+      )
+
+    response =
+      conn
+      |> put_req_header("authorization", "Bearer #{token}")
+      |> patch("/api/products/#{product.id}", %{
+        name: "changed name",
+        description: "changed description",
+        value: 100_000
+      })
+
+    assert response.status == 401
+  end
 end
