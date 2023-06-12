@@ -1,9 +1,10 @@
 defmodule DummyProductApiWeb.Auth.ClientAuth do
   import Plug.Conn
-  # import Phoenix.Controller
 
   alias DummyProductApiWeb.Auth.JWT
   alias DummyProductApi.UserRegistry
+
+  require Logger
 
   def fetch_user_info(conn, _opts) do
     with bearer_token_headers <- get_req_header(conn, "authorization"),
@@ -16,8 +17,7 @@ defmodule DummyProductApiWeb.Auth.ClientAuth do
         conn
 
       err ->
-        # TODO log error
-        IO.inspect(err)
+        Logger.error("An error occurred during use fetching in the request", error_info: err)
         conn
     end
   end

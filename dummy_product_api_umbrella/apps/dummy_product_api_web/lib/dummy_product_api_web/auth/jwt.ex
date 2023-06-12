@@ -39,6 +39,7 @@ defmodule DummyProductApiWeb.Auth.JWT do
         nil ->
           Logger.warning("No key id (kid) header present in token")
           @hook_signature_error
+
         kid ->
           Logger.warning("Key for JWT token not recognized #{kid}")
           @hook_signature_error

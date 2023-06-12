@@ -11,4 +11,10 @@ defmodule DummyProductApi.ProductDatabaseStore do
   def create_product(product) do
     Repo.insert(product)
   end
+
+  def get(id), do: Repo.get(Product, id)
+
+  def update_product(product_changeset) do
+    Repo.update(product_changeset)
+  end
 end

@@ -224,6 +224,7 @@ openssl sha1 <filepath>
   - protect endpoints with JWT when authN/Z is required
 - Build an API for users (with tests)
 - Build an API for products (with tests)
+- test fixtures - https://blog.appsignal.com/2023/02/28/an-introduction-to-test-factories-and-fixtures-for-elixir.html 
 - Run as docker container
 - Get telemetry/metrics using a prometheus exporter
   - https://github.com/deadtrickster/prometheus-phoenix

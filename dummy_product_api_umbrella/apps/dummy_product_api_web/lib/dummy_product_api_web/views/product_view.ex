@@ -1,7 +1,7 @@
 defmodule DummyProductApiWeb.ProductView do
   use DummyProductApiWeb, :view
 
-  def render("create.json", %{product: product}) do
+  def render("product.json", %{product: product}) do
     %{
       data: %{
         id: product.id,

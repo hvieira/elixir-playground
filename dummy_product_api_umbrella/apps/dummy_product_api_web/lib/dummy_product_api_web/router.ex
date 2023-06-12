@@ -27,7 +27,7 @@ defmodule DummyProductApiWeb.Router do
   scope "/api", DummyProductApiWeb do
     pipe_through [:api, :require_authenticated_user]
 
-    resources "/products", ProductController, only: [:create, :show, :update, :delete]
+    resources "/products", ProductController, only: [:create, :update]
   end
 
   # Enables LiveDashboard only for development

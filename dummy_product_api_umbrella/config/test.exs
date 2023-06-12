@@ -55,6 +55,7 @@ config :joken,
     key_pem: old_private_key_contents,
     jose_extra_headers: %{"kid" => old_key_id}
   ]
+
 #  default_signer:
 #    [
 #      signer_alg: "RS256",
