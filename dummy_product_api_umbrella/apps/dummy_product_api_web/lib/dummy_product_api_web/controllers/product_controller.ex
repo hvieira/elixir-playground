@@ -33,6 +33,9 @@ defmodule DummyProductApiWeb.ProductController do
       {:error, :invalid_product_attributes} ->
         {:error, :bad_request}
 
+      {:error, :product_not_found} ->
+        {:error, :not_found}
+
       _err ->
         {:error, :internal_server_error}
     end

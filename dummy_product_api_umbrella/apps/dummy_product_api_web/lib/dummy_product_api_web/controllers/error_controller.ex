@@ -21,4 +21,11 @@ defmodule DummyProductApiWeb.ErrorController do
     |> put_view(DummyProductApiWeb.ErrorView)
     |> render("403.json")
   end
+
+  def call(conn, {:error, :not_found}) do
+    conn
+    |> put_status(:not_found)
+    |> put_view(DummyProductApiWeb.ErrorView)
+    |> render("404.json")
+  end
 end

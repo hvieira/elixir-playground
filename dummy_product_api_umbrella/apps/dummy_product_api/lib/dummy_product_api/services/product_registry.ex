@@ -27,7 +27,7 @@ defmodule DummyProductApi.ProductRegistry do
   end
 
   def update_product(user, product_id, product_attributes) do
-    with product <- product_store().get(product_id),
+    with product when not is_nil(product) <- product_store().get(product_id),
          :user_is_owner <- is_user_owner_of_product(user, product) do
       product
       |> Product.changeset(product_attributes)
@@ -35,6 +35,8 @@ defmodule DummyProductApi.ProductRegistry do
     else
       :user_not_owner ->
         {:error, :user_not_owner}
+      nil ->
+        {:error, :product_not_found}
     end
   end
 

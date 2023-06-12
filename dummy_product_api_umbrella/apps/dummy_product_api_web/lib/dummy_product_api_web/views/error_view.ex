@@ -31,4 +31,10 @@ defmodule DummyProductApiWeb.ErrorView do
       message: "Forbidden"
     }
   end
+
+  def render("404.json", _assigns) do
+    %{
+      message: "Not Found"
+    }
+  end
 end

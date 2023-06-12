@@ -229,4 +229,37 @@ defmodule DummyProductApiWeb.ProductControllerIntegrationTest do
       "message" => "Forbidden"
     } = json_response(response, 403)
   end
+
+  test "updating a non existing product returns a not found 404", %{conn: conn} do
+    {:ok, user} =
+      Repo.insert(
+        User.changeset(%User{}, %{
+          name: "Test",
+          username: "test",
+          password: "test"
+        })
+      )
+
+    {:ok, token, _claims} =
+      JWT.generate_and_sign(
+        %{sub: user.id},
+        :new_signer
+      )
+
+    non_existing_product_id = UUID.uuid4()
+
+    response =
+      conn
+      |> put_req_header("authorization", "Bearer #{token}")
+      |> patch("/api/products/#{non_existing_product_id}", %{
+        name: "changed name",
+        description: "changed description",
+        value: 100_000
+      })
+
+    # assert response structure
+    %{
+      "message" => "Not Found"
+    } = json_response(response, 404)
+  end
 end
