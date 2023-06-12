@@ -64,7 +64,7 @@ defmodule DummyProductApiWeb.ProductControllerIntegrationTest do
            )
   end
 
-  test "user can edit own products", %{conn: conn} do
+  test "user can update own products", %{conn: conn} do
     {:ok, user} =
       Repo.insert(
         User.changeset(%User{}, %{
@@ -128,7 +128,6 @@ defmodule DummyProductApiWeb.ProductControllerIntegrationTest do
            )
   end
 
-  # TODO test update does not update the ID of the product
   test "sending ID in the update request does not update the product ID", %{conn: conn} do
     {:ok, user} =
       Repo.insert(
@@ -169,7 +168,7 @@ defmodule DummyProductApiWeb.ProductControllerIntegrationTest do
     # assert response structure
     %{
       "data" => %{
-        "id" => product_id,
+        "id" => product_id
       }
     } = json_response(response, 200)
 
@@ -179,5 +178,55 @@ defmodule DummyProductApiWeb.ProductControllerIntegrationTest do
     assert updated_product.id == product_id
   end
 
-  # TODO test user cannot update products that they do not own
+  test "user cannot update products that they dont own", %{conn: conn} do
+    {:ok, user1} =
+      Repo.insert(
+        User.changeset(%User{}, %{
+          name: "Test",
+          username: "test",
+          password: "test"
+        })
+      )
+
+    owner_user_id = user1.id
+
+    {:ok, user2} =
+      Repo.insert(
+        User.changeset(%User{}, %{
+          name: "Test 2",
+          username: "test 2",
+          password: "test 2"
+        })
+      )
+
+    # create owned product by user 1
+    {:ok, product} =
+      Ecto.build_assoc(user1, :products, %{
+        name: "product by #{owner_user_id}",
+        description: "amazing product by #{owner_user_id}. It's really great!",
+        value: 100
+      })
+      |> Repo.insert()
+
+    # try to update product as user 2
+    {:ok, token, _claims} =
+      JWT.generate_and_sign(
+        %{sub: user2.id},
+        :new_signer
+      )
+
+    response =
+      conn
+      |> put_req_header("authorization", "Bearer #{token}")
+      |> patch("/api/products/#{product.id}", %{
+        name: "changed name",
+        description: "changed description",
+        value: 100_000
+      })
+
+    # assert response structure
+    %{
+      "message" => "Forbidden"
+    } = json_response(response, 403)
+  end
 end

@@ -28,12 +28,21 @@ defmodule DummyProductApi.ProductRegistry do
 
   def update_product(user, product_id, product_attributes) do
     with product <- product_store().get(product_id),
-         true <- is_user_owner_of_product(user, product) do
+         :user_is_owner <- is_user_owner_of_product(user, product) do
       product
       |> Product.changeset(product_attributes)
       |> product_store().update_product()
+    else
+      :user_not_owner ->
+        {:error, :user_not_owner}
     end
   end
 
-  defp is_user_owner_of_product(user, product), do: product.owner_user_id == user.id
+  defp is_user_owner_of_product(user, product) do
+    if product.owner_user_id == user.id do
+      :user_is_owner
+    else
+      :user_not_owner
+    end
+  end
 end

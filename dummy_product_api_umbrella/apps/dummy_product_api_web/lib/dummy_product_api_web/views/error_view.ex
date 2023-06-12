@@ -25,4 +25,10 @@ defmodule DummyProductApiWeb.ErrorView do
       message: "Internal server error"
     }
   end
+
+  def render("403.json", _assigns) do
+    %{
+      message: "Forbidden"
+    }
+  end
 end

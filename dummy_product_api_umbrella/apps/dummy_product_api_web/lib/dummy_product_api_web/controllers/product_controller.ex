@@ -27,7 +27,7 @@ defmodule DummyProductApiWeb.ProductController do
     with {:ok, product} <- ProductRegistry.update_product(user, product_id, params) do
       render(conn, "product.json", product: product)
     else
-      {:error, :not_owner} ->
+      {:error, :user_not_owner} ->
         {:error, :forbidden}
 
       {:error, :invalid_product_attributes} ->

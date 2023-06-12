@@ -14,4 +14,11 @@ defmodule DummyProductApiWeb.ErrorController do
     |> put_view(DummyProductApiWeb.ErrorView)
     |> render("500.json")
   end
+
+  def call(conn, {:error, :forbidden}) do
+    conn
+    |> put_status(:forbidden)
+    |> put_view(DummyProductApiWeb.ErrorView)
+    |> render("403.json")
+  end
 end
