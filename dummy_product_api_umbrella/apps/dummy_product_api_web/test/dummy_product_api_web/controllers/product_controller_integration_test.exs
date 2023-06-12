@@ -79,8 +79,6 @@ defmodule DummyProductApiWeb.ProductControllerIntegrationTest do
     new_product_description = "changed description"
     new_product_value = 113
 
-    IO.inspect(user_id)
-
     # create owned product
     {:ok, product} =
       Ecto.build_assoc(user, :products, %{
@@ -131,5 +129,55 @@ defmodule DummyProductApiWeb.ProductControllerIntegrationTest do
   end
 
   # TODO test update does not update the ID of the product
+  test "sending ID in the update request does not update the product ID", %{conn: conn} do
+    {:ok, user} =
+      Repo.insert(
+        User.changeset(%User{}, %{
+          name: "Test",
+          username: "test",
+          password: "test"
+        })
+      )
+
+    user_id = user.id
+
+    # create owned product
+    {:ok, product} =
+      Ecto.build_assoc(user, :products, %{
+        name: "product by #{user_id}",
+        description: "amazing product by #{user_id}. It's really great!",
+        value: 100
+      })
+      |> Repo.insert()
+
+    {:ok, token, _claims} =
+      JWT.generate_and_sign(
+        %{sub: user_id},
+        :new_signer
+      )
+
+    response =
+      conn
+      |> put_req_header("authorization", "Bearer #{token}")
+      |> patch("/api/products/#{product.id}", %{
+        id: "some ID that is not supposed to be considered",
+        name: "changed name",
+        description: "changed description",
+        value: 113
+      })
+
+    # assert response structure
+    %{
+      "data" => %{
+        "id" => product_id,
+      }
+    } = json_response(response, 200)
+
+    updated_product = Repo.get!(Product, product_id)
+
+    assert updated_product.id != "some ID that is not supposed to be considered"
+    assert updated_product.id == product_id
+  end
+
   # TODO test user cannot update products that they do not own
 end
