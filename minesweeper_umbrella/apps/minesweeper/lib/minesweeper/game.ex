@@ -5,9 +5,9 @@ defmodule Minesweeper.Coordinates do
 end
 
 defmodule Minesweeper.Cell do
-  defstruct revealed: false
+  defstruct revealed: false, mined: false
 
-  @type t :: %Minesweeper.Cell{revealed: boolean()}
+  @type t :: %Minesweeper.Cell{revealed: boolean(), mined: boolean()}
 end
 
 defmodule Minesweeper.Game do
@@ -19,12 +19,23 @@ defmodule Minesweeper.Game do
           cells: %{Minesweeper.Coordinates.t() => Minesweeper.Cell.t()}
         }
 
-  def create(width, height),
-    do: %Minesweeper.Game{width: width, height: height, cells: create_cells(width, height)}
+  def create(width, height, number_of_mines, mine_picker_func \\ &Enum.take_random/2),
+    do: %Minesweeper.Game{
+      width: width,
+      height: height,
+      cells: create_cells(width, height, number_of_mines, mine_picker_func)
+    }
 
-  defp create_cells(width, height) do
-    for x <- 0..(height-1), y <- 0..(width-1), into: %{} do
-      {%Minesweeper.Coordinates{x: x, y: y}, %Minesweeper.Cell{}}
-    end
+  defp create_cells(width, height, number_of_mines, mine_picker_func) do
+    unmined_cells =
+      for x <- 0..(height - 1), y <- 0..(width - 1), into: %{} do
+        {%Minesweeper.Coordinates{x: x, y: y}, %Minesweeper.Cell{}}
+      end
+
+    unmined_cells
+    |> mine_picker_func.(number_of_mines)
+    |> Enum.reduce(unmined_cells, fn cell_to_mine, acc ->
+      acc |> Map.update!(elem(cell_to_mine, 0), fn cell -> %{cell | mined: true} end)
+    end)
   end
 end
