@@ -1,6 +1,8 @@
 defmodule DummyProductApiWeb.Router do
   use DummyProductApiWeb, :router
 
+  import DummyProductApiWeb.Auth.ClientAuth
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -12,18 +14,20 @@ defmodule DummyProductApiWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
-  end
-
-  scope "/", DummyProductApiWeb do
-    pipe_through :browser
-
-    get "/", PageController, :index
+    plug :fetch_user_info
   end
 
   scope "/api", DummyProductApiWeb do
     pipe_through :api
 
-    resources "/users", UserController, only: [:create, :show, :update, :delete]
+    resources "/users", UserController, only: [:create]
+    post "/login", LoginController, :login
+  end
+
+  scope "/api", DummyProductApiWeb do
+    pipe_through [:api, :require_authenticated_user]
+
+    resources "/products", ProductController, only: [:create, :update]
   end
 
   # Enables LiveDashboard only for development

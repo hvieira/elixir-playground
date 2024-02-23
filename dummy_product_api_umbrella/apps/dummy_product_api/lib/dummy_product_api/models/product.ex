@@ -16,7 +16,7 @@ defmodule DummyProductApi.Product do
   def changeset(product, attrs) do
     product
     |> cast(attrs, [:name, :description, :value])
-    |> cast_assoc(:owner)
-    |> validate_required([:name, :description, :value, :owner])
+    |> cast_assoc(:owner_user)
+    |> validate_required([:name, :description, :value])
   end
 end
