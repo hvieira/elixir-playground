@@ -105,15 +105,15 @@ defmodule Minesweeper.GameTest do
              width: 3,
              height: 3,
              cells: %{
-               %Coordinates{x: 0, y: 0} => %Cell{mined: false},
-               %Coordinates{x: 0, y: 1} => %Cell{mined: true},
-               %Coordinates{x: 0, y: 2} => %Cell{mined: false},
-               %Coordinates{x: 1, y: 0} => %Cell{mined: false},
-               %Coordinates{x: 1, y: 1} => %Cell{mined: false},
-               %Coordinates{x: 1, y: 2} => %Cell{mined: true},
-               %Coordinates{x: 2, y: 0} => %Cell{mined: false},
-               %Coordinates{x: 2, y: 1} => %Cell{mined: false},
-               %Coordinates{x: 2, y: 2} => %Cell{mined: false}
+               %Coordinates{x: 0, y: 0} => %Cell{mined: false, num_adjacent_mines: 1},
+               %Coordinates{x: 0, y: 1} => %Cell{mined: true, num_adjacent_mines: 1},
+               %Coordinates{x: 0, y: 2} => %Cell{mined: false, num_adjacent_mines: 2},
+               %Coordinates{x: 1, y: 0} => %Cell{mined: false, num_adjacent_mines: 1},
+               %Coordinates{x: 1, y: 1} => %Cell{mined: false, num_adjacent_mines: 2},
+               %Coordinates{x: 1, y: 2} => %Cell{mined: true, num_adjacent_mines: 1},
+               %Coordinates{x: 2, y: 0} => %Cell{mined: false, num_adjacent_mines: 0},
+               %Coordinates{x: 2, y: 1} => %Cell{mined: false, num_adjacent_mines: 1},
+               %Coordinates{x: 2, y: 2} => %Cell{mined: false, num_adjacent_mines: 1}
              }
            }
 
@@ -127,15 +127,15 @@ defmodule Minesweeper.GameTest do
              width: 3,
              height: 3,
              cells: %{
-               %Coordinates{x: 0, y: 0} => %Cell{mined: true},
-               %Coordinates{x: 0, y: 1} => %Cell{mined: false},
-               %Coordinates{x: 0, y: 2} => %Cell{mined: false},
-               %Coordinates{x: 1, y: 0} => %Cell{mined: false},
-               %Coordinates{x: 1, y: 1} => %Cell{mined: true},
-               %Coordinates{x: 1, y: 2} => %Cell{mined: false},
-               %Coordinates{x: 2, y: 0} => %Cell{mined: false},
-               %Coordinates{x: 2, y: 1} => %Cell{mined: false},
-               %Coordinates{x: 2, y: 2} => %Cell{mined: true}
+               %Coordinates{x: 0, y: 0} => %Cell{mined: true, num_adjacent_mines: 1},
+               %Coordinates{x: 0, y: 1} => %Cell{mined: false, num_adjacent_mines: 2},
+               %Coordinates{x: 0, y: 2} => %Cell{mined: false, num_adjacent_mines: 1},
+               %Coordinates{x: 1, y: 0} => %Cell{mined: false, num_adjacent_mines: 2},
+               %Coordinates{x: 1, y: 1} => %Cell{mined: true, num_adjacent_mines: 2},
+               %Coordinates{x: 1, y: 2} => %Cell{mined: false, num_adjacent_mines: 2},
+               %Coordinates{x: 2, y: 0} => %Cell{mined: false, num_adjacent_mines: 1},
+               %Coordinates{x: 2, y: 1} => %Cell{mined: false, num_adjacent_mines: 2},
+               %Coordinates{x: 2, y: 2} => %Cell{mined: true, num_adjacent_mines: 1}
              }
            }
   end
