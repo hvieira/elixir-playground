@@ -392,4 +392,306 @@ defmodule Minesweeper.GameTest do
     assert Game.reveal(initial_game, %Coordinates{x: 2, y: 1}) == {:ok, all_safe_cells_revealed}
     assert Game.reveal(initial_game, %Coordinates{x: 2, y: 2}) == {:ok, all_safe_cells_revealed}
   end
+
+  test "flagging a non revealed cell flags that cell" do
+    initial_game = %Game{
+      width: 3,
+      height: 3,
+      cells: %{
+        %Coordinates{x: 0, y: 0} => %Cell{mined: true, num_adjacent_mines: 0},
+        %Coordinates{x: 0, y: 1} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 1} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 2} => %Cell{num_adjacent_mines: 0}
+      }
+    }
+
+    assert Game.flag(initial_game, %Coordinates{x: 0, y: 0}) ==
+             {:ok,
+              %Game{
+                width: 3,
+                height: 3,
+                cells: %{
+                  %Coordinates{x: 0, y: 0} => %Cell{
+                    mined: true,
+                    flagged: true,
+                    num_adjacent_mines: 0
+                  },
+                  %Coordinates{x: 0, y: 1} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 1} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 2} => %Cell{num_adjacent_mines: 0}
+                }
+              }}
+
+    assert Game.flag(initial_game, %Coordinates{x: 0, y: 1}) ==
+             {:ok,
+              %Game{
+                width: 3,
+                height: 3,
+                cells: %{
+                  %Coordinates{x: 0, y: 0} => %Cell{mined: true, num_adjacent_mines: 0},
+                  %Coordinates{x: 0, y: 1} => %Cell{flagged: true, num_adjacent_mines: 1},
+                  %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 1} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 2} => %Cell{num_adjacent_mines: 0}
+                }
+              }}
+
+    assert Game.flag(initial_game, %Coordinates{x: 2, y: 2}) ==
+             {:ok,
+              %Game{
+                width: 3,
+                height: 3,
+                cells: %{
+                  %Coordinates{x: 0, y: 0} => %Cell{mined: true, num_adjacent_mines: 0},
+                  %Coordinates{x: 0, y: 1} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 1} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 2} => %Cell{flagged: true, num_adjacent_mines: 0}
+                }
+              }}
+  end
+
+  test "flagging a revealed cell is not supported" do
+    initial_game = %Game{
+      width: 3,
+      height: 3,
+      cells: %{
+        %Coordinates{x: 0, y: 0} => %Cell{mined: true, num_adjacent_mines: 0},
+        %Coordinates{x: 0, y: 1} => %Cell{revealed: true, flagged: false, num_adjacent_mines: 1},
+        %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 1} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 2} => %Cell{num_adjacent_mines: 0}
+      }
+    }
+
+    assert Game.flag(initial_game, %Coordinates{x: 0, y: 1}) ==
+             {:invalid_instruction, initial_game}
+  end
+
+  test "flagging a flagged cell flagsis a no-op" do
+    initial_game = %Game{
+      width: 3,
+      height: 3,
+      cells: %{
+        %Coordinates{x: 0, y: 0} => %Cell{mined: true, flagged: true, num_adjacent_mines: 0},
+        %Coordinates{x: 0, y: 1} => %Cell{flagged: true, num_adjacent_mines: 1},
+        %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 1} => %Cell{flagged: true, num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 2} => %Cell{num_adjacent_mines: 0}
+      }
+    }
+
+    assert Game.flag(initial_game, %Coordinates{x: 0, y: 0}) == {:ok, initial_game}
+    assert Game.flag(initial_game, %Coordinates{x: 0, y: 1}) == {:ok, initial_game}
+    assert Game.flag(initial_game, %Coordinates{x: 2, y: 1}) == {:ok, initial_game}
+  end
+
+  test "flagging a non-existing cell (aka bad coordinates) returns an error" do
+    initial_game = %Game{
+      width: 3,
+      height: 3,
+      cells: %{
+        %Coordinates{x: 0, y: 0} => %Cell{},
+        %Coordinates{x: 0, y: 1} => %Cell{},
+        %Coordinates{x: 0, y: 2} => %Cell{},
+        %Coordinates{x: 1, y: 0} => %Cell{},
+        %Coordinates{x: 1, y: 1} => %Cell{},
+        %Coordinates{x: 1, y: 2} => %Cell{},
+        %Coordinates{x: 2, y: 0} => %Cell{},
+        %Coordinates{x: 2, y: 1} => %Cell{},
+        %Coordinates{x: 2, y: 2} => %Cell{}
+      }
+    }
+
+    assert Game.flag(initial_game, %Coordinates{x: 0, y: 3}) ==
+             {:invalid_coordinates, initial_game}
+
+    assert Game.flag(initial_game, %Coordinates{x: 3, y: 0}) ==
+             {:invalid_coordinates, initial_game}
+
+    assert Game.flag(initial_game, %Coordinates{x: 3, y: 3}) ==
+             {:invalid_coordinates, initial_game}
+  end
+
+  test "unflagging a flagged cell unflags that cell" do
+    initial_game = %Game{
+      width: 3,
+      height: 3,
+      cells: %{
+        %Coordinates{x: 0, y: 0} => %Cell{mined: true, flagged: true, num_adjacent_mines: 0},
+        %Coordinates{x: 0, y: 1} => %Cell{flagged: true, num_adjacent_mines: 1},
+        %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 1} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 2} => %Cell{flagged: true, num_adjacent_mines: 0}
+      }
+    }
+
+    assert Game.unflag(initial_game, %Coordinates{x: 0, y: 0}) ==
+             {:ok,
+              %Game{
+                width: 3,
+                height: 3,
+                cells: %{
+                  %Coordinates{x: 0, y: 0} => %Cell{
+                    mined: true,
+                    flagged: false,
+                    num_adjacent_mines: 0
+                  },
+                  %Coordinates{x: 0, y: 1} => %Cell{flagged: true, num_adjacent_mines: 1},
+                  %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 1} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 2} => %Cell{flagged: true, num_adjacent_mines: 0}
+                }
+              }}
+
+    assert Game.unflag(initial_game, %Coordinates{x: 0, y: 1}) ==
+             {:ok,
+              %Game{
+                width: 3,
+                height: 3,
+                cells: %{
+                  %Coordinates{x: 0, y: 0} => %Cell{
+                    mined: true,
+                    flagged: true,
+                    num_adjacent_mines: 0
+                  },
+                  %Coordinates{x: 0, y: 1} => %Cell{flagged: false, num_adjacent_mines: 1},
+                  %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 1} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 2} => %Cell{flagged: true, num_adjacent_mines: 0}
+                }
+              }}
+
+    assert Game.unflag(initial_game, %Coordinates{x: 2, y: 2}) ==
+             {:ok,
+              %Game{
+                width: 3,
+                height: 3,
+                cells: %{
+                  %Coordinates{x: 0, y: 0} => %Cell{
+                    mined: true,
+                    flagged: true,
+                    num_adjacent_mines: 0
+                  },
+                  %Coordinates{x: 0, y: 1} => %Cell{flagged: true, num_adjacent_mines: 1},
+                  %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+                  %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 1} => %Cell{num_adjacent_mines: 0},
+                  %Coordinates{x: 2, y: 2} => %Cell{flagged: false, num_adjacent_mines: 0}
+                }
+              }}
+  end
+
+  test "unflagging a revealed cell is not supported" do
+    initial_game = %Game{
+      width: 3,
+      height: 3,
+      cells: %{
+        %Coordinates{x: 0, y: 0} => %Cell{mined: true, num_adjacent_mines: 0},
+        %Coordinates{x: 0, y: 1} => %Cell{revealed: true, flagged: true, num_adjacent_mines: 1},
+        %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 1} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 2} => %Cell{num_adjacent_mines: 0}
+      }
+    }
+
+    assert Game.unflag(initial_game, %Coordinates{x: 0, y: 1}) ==
+             {:invalid_instruction, initial_game}
+  end
+
+  test "unflagging a non-flagged cell is not supported" do
+    initial_game = %Game{
+      width: 3,
+      height: 3,
+      cells: %{
+        %Coordinates{x: 0, y: 0} => %Cell{mined: true, num_adjacent_mines: 0},
+        %Coordinates{x: 0, y: 1} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 0, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 1, y: 0} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 1} => %Cell{num_adjacent_mines: 1},
+        %Coordinates{x: 1, y: 2} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 0} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 1} => %Cell{num_adjacent_mines: 0},
+        %Coordinates{x: 2, y: 2} => %Cell{num_adjacent_mines: 0}
+      }
+    }
+
+    assert Game.unflag(initial_game, %Coordinates{x: 0, y: 1}) ==
+             {:invalid_instruction, initial_game}
+  end
+
+  test "unflagging a non-existing cell (aka bad coordinates) returns an error" do
+    initial_game = %Game{
+      width: 3,
+      height: 3,
+      cells: %{
+        %Coordinates{x: 0, y: 0} => %Cell{},
+        %Coordinates{x: 0, y: 1} => %Cell{},
+        %Coordinates{x: 0, y: 2} => %Cell{},
+        %Coordinates{x: 1, y: 0} => %Cell{},
+        %Coordinates{x: 1, y: 1} => %Cell{},
+        %Coordinates{x: 1, y: 2} => %Cell{},
+        %Coordinates{x: 2, y: 0} => %Cell{},
+        %Coordinates{x: 2, y: 1} => %Cell{},
+        %Coordinates{x: 2, y: 2} => %Cell{}
+      }
+    }
+
+    assert Game.unflag(initial_game, %Coordinates{x: 0, y: 3}) ==
+             {:invalid_coordinates, initial_game}
+
+    assert Game.unflag(initial_game, %Coordinates{x: 3, y: 0}) ==
+             {:invalid_coordinates, initial_game}
+
+    assert Game.unflag(initial_game, %Coordinates{x: 3, y: 3}) ==
+             {:invalid_coordinates, initial_game}
+  end
+
+  ## TODO
+  # - endgame scenarios
 end

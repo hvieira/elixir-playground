@@ -5,12 +5,15 @@ defmodule Minesweeper.Coordinates do
 end
 
 defmodule Minesweeper.Cell do
-  defstruct revealed: false, mined: false, num_adjacent_mines: 0
+  defstruct revealed: false, mined: false, flagged: false, num_adjacent_mines: 0
 
   @type t :: %Minesweeper.Cell{revealed: boolean(), mined: boolean(), num_adjacent_mines: integer}
 end
 
 defmodule Minesweeper.Game do
+  @invalid_coordinates :invalid_coordinates
+  @invalid_instruction :invalid_instruction
+
   defstruct [:width, :height, :cells]
 
   @type t :: %Minesweeper.Game{
@@ -29,7 +32,38 @@ defmodule Minesweeper.Game do
   def reveal(%Minesweeper.Game{} = game, coordinates),
     do: reveal_cell(game, coordinates, Map.get(game.cells, coordinates))
 
-  defp reveal_cell(game, _coordinates, nil), do: {:invalid_coordinates, game}
+  def flag(%Minesweeper.Game{} = game, coordinates) do
+    case Map.get(game.cells, coordinates) do
+      %Minesweeper.Cell{revealed: false} ->
+        {:ok,
+         %{game | cells: Map.update!(game.cells, coordinates, fn c -> %{c | flagged: true} end)}}
+
+      %Minesweeper.Cell{revealed: true} ->
+        {@invalid_instruction, game}
+
+      nil ->
+        {@invalid_coordinates, game}
+    end
+  end
+
+  def unflag(%Minesweeper.Game{} = game, coordinates) do
+    case Map.get(game.cells, coordinates) do
+      %Minesweeper.Cell{flagged: false} ->
+        {@invalid_instruction, game}
+
+      %Minesweeper.Cell{revealed: false, flagged: true} ->
+        {:ok,
+         %{game | cells: Map.update!(game.cells, coordinates, fn c -> %{c | flagged: false} end)}}
+
+      %Minesweeper.Cell{revealed: true} ->
+        {@invalid_instruction, game}
+
+      nil ->
+        {@invalid_coordinates, game}
+    end
+  end
+
+  defp reveal_cell(game, _coordinates, nil), do: {@invalid_coordinates, game}
 
   defp reveal_cell(game, _coordinates, %Minesweeper.Cell{revealed: true, mined: false}),
     do: {:ok, game}
