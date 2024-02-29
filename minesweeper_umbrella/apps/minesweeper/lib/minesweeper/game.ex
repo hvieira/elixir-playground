@@ -32,27 +32,27 @@ defmodule Minesweeper.Game do
     }
 
   def reveal(%Minesweeper.Game{state: game_state} = game, _coordinates)
-      when game_state == :game_lost or game_state == :game_won do
-    {:game_over, game}
-  end
+      when game_state == :game_lost or game_state == :game_won,
+      do: {:game_over, game}
 
   def reveal(%Minesweeper.Game{} = game, coordinates),
     do: reveal_cell(game, coordinates, Map.get(game.cells, coordinates))
 
   def flag(%Minesweeper.Game{state: game_state} = game, _coordinates)
-      when game_state == :game_lost or game_state == :game_won do
-    {:game_over, game}
-  end
+      when game_state == :game_lost or game_state == :game_won,
+      do: {:game_over, game}
 
   def flag(%Minesweeper.Game{} = game, coordinates) do
     case Map.get(game.cells, coordinates) do
       %Minesweeper.Cell{revealed: false} ->
-        updated_game = %{
-          game
-          | cells: Map.update!(game.cells, coordinates, fn c -> %{c | flagged: true} end)
-        }
+        updated_game =
+          %{
+            game
+            | cells: Map.update!(game.cells, coordinates, fn c -> %{c | flagged: true} end)
+          }
+          |> update_game_state()
 
-        {:ok, updated_game |> update_game_state()}
+        {:ok, updated_game}
 
       %Minesweeper.Cell{revealed: true} ->
         {@invalid_instruction, game}
@@ -63,9 +63,8 @@ defmodule Minesweeper.Game do
   end
 
   def unflag(%Minesweeper.Game{state: game_state} = game, _coordinates)
-      when game_state == :game_lost or game_state == :game_won do
-    {:game_over, game}
-  end
+      when game_state == :game_lost or game_state == :game_won,
+      do: {:game_over, game}
 
   def unflag(%Minesweeper.Game{} = game, coordinates) do
     case Map.get(game.cells, coordinates) do
@@ -108,12 +107,14 @@ defmodule Minesweeper.Game do
          num_adjacent_mines: mines_around
        })
        when mines_around > 0 do
-    updated_game = %{
-      game
-      | cells: Map.update!(game.cells, coordinates, fn cell -> %{cell | revealed: true} end)
-    }
+    updated_game =
+      %{
+        game
+        | cells: Map.update!(game.cells, coordinates, fn cell -> %{cell | revealed: true} end)
+      }
+      |> update_game_state()
 
-    {:ok, updated_game |> update_game_state()}
+    {:ok, updated_game}
   end
 
   defp reveal_cell(game, coordinates, %Minesweeper.Cell{
@@ -122,8 +123,7 @@ defmodule Minesweeper.Game do
          num_adjacent_mines: mines
        })
        when mines == 0 do
-    updated_game = reveal_all_safe_cells(game, [coordinates])
-    {:ok, updated_game |> update_game_state()}
+    {:ok, reveal_all_safe_cells(game, [coordinates]) |> update_game_state()}
   end
 
   defp reveal_all_safe_cells(game_state, coordinates_to_explore, explored \\ MapSet.new())
@@ -215,7 +215,6 @@ defmodule Minesweeper.Game do
         end
       end)
 
-    # IO.inspect(stats)
     case stats do
       [flagged_mines: fm, revealed_cells: rc]
       when fm == game.number_of_mines and rc == number_of_non_mined_cells ->
